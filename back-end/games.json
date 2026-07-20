@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name": "Jedi: Survivor",
+    "price": "30.00zł",
+    "imgUrl": "/covers/jedi-survivor.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 2,
+    "name": "Counter-Strike 2",
+    "price": "30.00zł",
+    "imgUrl": "/covers/counter-strike-2.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": true,
+    "hidden": true
+  },
+  {
+    "id": 3,
+    "name": "Hogwarts legacy",
+    "price": "30.00zł",
+    "imgUrl": "/covers/hogwarts-legacy.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 4,
+    "name": "Ready or not",
+    "price": "30.00zł",
+    "imgUrl": "/covers/ready-or-not.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 5,
+    "name": "The last of us part I",
+    "price": "30.00zł",
+    "imgUrl": "/covers/last-of-us.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 6,
+    "name": "GTA 5",
+    "price": "30.00zł",
+    "imgUrl": "/covers/gta-5.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 7,
+    "name": "The wicher: wild hunt",
+    "price": "30.00zł",
+    "imgUrl": "/covers/witcher-3.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 8,
+    "name": "DIABLO IV",
+    "price": "30.00zł",
+    "imgUrl": "/covers/diablo-iv.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 9,
+    "name": "Call of Duty: Modern warfer II",
+    "price": "30.00zł",
+    "imgUrl": "/covers/cod-mw2.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 10,
+    "name": "War Thunder",
+    "price": "30.00zł",
+    "imgUrl": "/covers/war-thunder.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 11,
+    "name": "Dead by daylight",
+    "price": "30.00zł",
+    "imgUrl": "/covers/dead-by-daylight.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  },
+  {
+    "id": 12,
+    "name": "Cyberpunk 2077",
+    "price": "30.00zł",
+    "imgUrl": "/covers/cyberpunk-2077.png",
+    "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/",
+    "rating": 5,
+    "wishlisted": false,
+    "hidden": false
+  }
+]
