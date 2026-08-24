@@ -1,0 +1,84 @@
+/* Shared by /login and /register — same look as the filter sidebar sections. */
+
+.auth {
+  display: flex;
+  justify-content: center;
+  padding: 60px 16px;
+
+  .auth__form {
+    width: min(420px, 100%);
+    padding: 26px 22px 30px;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-panel);
+  }
+
+  .auth__title {
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+    letter-spacing: var(--tracking);
+    color: var(--color-text-soft);
+    margin-bottom: 24px;
+  }
+
+  .auth__field {
+    display: block;
+    border-top: 1px solid var(--color-border);
+    padding: 14px 0 16px;
+  }
+
+  .auth__label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-text-label);
+  }
+
+  .auth__input {
+    display: block;
+    width: 100%;
+    height: 40px;
+    padding: 0 9px;
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-border-input);
+    border-radius: 4px;
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    letter-spacing: var(--tracking);
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-yellow);
+    }
+  }
+
+  .auth__submit {
+    width: 100%;
+    height: 46px;
+    margin-top: 22px;
+    border-radius: var(--radius-btn);
+    background: var(--grad-brand);
+    font-size: var(--font-size-xl);
+    font-weight: 500;
+    color: var(--color-text);
+    text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+  }
+
+  .auth__alt {
+    margin-top: 18px;
+    text-align: center;
+    font-size: var(--font-size-base);
+    color: var(--color-text-muted);
+    letter-spacing: var(--tracking);
+  }
+
+  .auth__link {
+    color: var(--color-yellow);
+    font-weight: 700;
+  }
+}
