@@ -1,0 +1,11 @@
+/* Font-size scale — used by every component stylesheet. */
+:root {
+  --font-size-xs: 10px; /* try-asking header */
+  --font-size-sm: 11px; /* filter section labels */
+  --font-size-base: 13px; /* card name/price, inputs, chat suggestions */
+  --font-size-md: 14px; /* hero paragraph */
+  --font-size-lg: 16px; /* chat bubbles, filter values, tags */
+  --font-size-xl: 19px; /* nav links, section titles, filter buttons */
+  --font-size-2xl: 26px; /* pagination */
+  --font-size-3xl: 29px; /* brand title, chat title */
+}

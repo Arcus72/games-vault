@@ -14,6 +14,12 @@
 - Pyhton
 - FastApi
 
+## Folders
+
+- backend – Contains the main server logic
+- chatbot – Temporary folder containing tested chatbot logic
+- frontend – User interface and visual components of the application
+
 ## Installation
 
 Prerequisites:

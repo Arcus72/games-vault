@@ -1,0 +1,125 @@
+@import "./variables.css";
+@import "./fonts.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.layout {
+  display: flex;
+  align-items: flex-start;
+
+  &.layout--library {
+    padding-top: 45px;
+  }
+
+  .layout__sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .layout__content {
+    flex: 1;
+    padding: 16px 28px 40px;
+  }
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+
+    &.layout--library {
+      padding-top: 20px;
+    }
+
+    .layout__sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .layout__content {
+      width: 100%;
+      padding: 16px 16px 40px;
+    }
+  }
+}
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  letter-spacing: var(--tracking);
+  text-transform: uppercase;
+  color: var(--color-text-label);
+
+  .sort-bar__img {
+    width: 221px;
+    height: 52px;
+  }
+
+  select {
+    appearance: none;
+    height: 40px;
+    padding: 0 34px 0 12px;
+    background: var(--color-input-bg)
+      /* ponytail: chevron as inline SVG, no icon component */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23efca08' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+      no-repeat right 12px center / 12px 8px;
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--radius-btn);
+    color: var(--color-text-soft);
+    font: inherit;
+    font-size: var(--font-size-base);
+    text-transform: none;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-border-gray);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--color-yellow);
+    }
+
+    option {
+      background: var(--color-panel);
+      color: var(--color-text-soft);
+    }
+  }
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
+  gap: 22px 32px;
+}
