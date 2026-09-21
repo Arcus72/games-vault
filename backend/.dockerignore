@@ -4,8 +4,3 @@ __pycache__
 *.pyc
 .git
 *.md
-node_modules
-.next
-.env
-.git
-*.md

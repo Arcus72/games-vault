@@ -26,35 +26,33 @@ export type FilterSection =
     };
 
 export interface Game {
-    id: number | string
-    name: string
-    price: string
-    imgUrl: string
-    steamUrl: string
-    rating: number
-    wishlisted: boolean
-    hidden: boolean
+  appid: number | string;
+  name: string;
+  price: number;
+  header_image: string;
+  isHidden: boolean | null;
+  library_wishlist: boolean | null;
+  release_date: string | null;
 }
 
 export interface GamesRes {
-    success: boolean
-    games: Game[]
-    currentPage: number
-    totalPages: number
+  games: Game[];
+  page: number;
+  pages: number;
 }
 
 export interface ChatGame {
-    id: string
-    title: string
-    price: number
-    currency: string
-    isWishList: boolean
-    imgUrl: string
-    steamUrl: string
+  id: string;
+  title: string;
+  price: number;
+  currency: string;
+  isWishList: boolean;
+  imgUrl: string;
+  steamUrl: string;
 }
 
 export interface MessageResponse {
-    success: boolean
-    response: string
-    games: ChatGame[]
+  success: boolean;
+  response: string;
+  games: ChatGame[];
 }

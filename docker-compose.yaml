@@ -1,0 +1,59 @@
+services:
+  web:
+    depends_on:
+      - api
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    develop:
+      watch:
+        - path: ./frontend/package.json
+          action: rebuild
+        - path: ./frontend/package-lock.json
+          action: rebuild
+        - path: ./frontend
+          target: /app
+          action: sync
+          ignore:
+            - node_modules/
+            - .next/
+
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DB_LINK: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
+    develop:
+      watch:
+        - path: ./backend/requirements.txt
+          action: rebuild
+        - path: ./backend
+          target: /app
+          action: sync
+          ignore:
+            - .venv/
+            - __pycache__/
+
+  db:
+    build: ./db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: gamesvault
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d gamesvault" ]
+      interval: 10s
+      retries: 10
+
+volumes:
+  postgres_data:

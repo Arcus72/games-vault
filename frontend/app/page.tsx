@@ -20,9 +20,11 @@ export default function MainPage() {
 
   useEffect(() => {
     getGames({ page, ...(filters && { filters }) }).then((res) => {
+      console.log(res);
+
       setGames(res?.games ?? []);
-      setPage(res?.currentPage ?? 1);
-      setTotalPages(res?.totalPages ?? 1);
+      setPage(res?.page ?? 1);
+      setTotalPages(res?.pages ?? 1);
     });
   }, [page, filters]);
 
@@ -65,7 +67,7 @@ export default function MainPage() {
           </div>
           <div className="grid">
             {games.map((g) => (
-              <GameCard key={g.id} game={g} />
+              <GameCard key={g.appid} game={g} />
             ))}
           </div>
           <Pagination

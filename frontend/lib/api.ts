@@ -1,9 +1,8 @@
 import type { GamesRes, MessageResponse } from "../interfaces";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function post<T>(path: string, body: unknown, fallback: T): Promise<T> {
-  // ponytail: fallback keeps pages rendering when the back-end is down
   try {
     const res = await fetch(`${API_URL}${path}`, {
       method: "POST",
@@ -17,10 +16,8 @@ async function post<T>(path: string, body: unknown, fallback: T): Promise<T> {
   }
 }
 
-//TODO: Fix sending
-//TODO: Działanie filtru
 export const getGames = (data: unknown) =>
-  post<GamesRes | null>("/api/games", data, null);
+  post<GamesRes | null>("/api/get_steam_games", data, null);
 
 export const sendMessage = (data: unknown) =>
   post<MessageResponse | null>("/api/message", data, null);

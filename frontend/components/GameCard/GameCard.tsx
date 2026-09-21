@@ -14,11 +14,15 @@ export default function GameCard({
   return (
     <a
       className="game-card"
-      href={game.steamUrl}
+      href={""}
       target="_blank"
       rel="noopener noreferrer"
     >
-      <img className="game-card__cover" src={game.imgUrl} alt={game.name} />
+      <img
+        className="game-card__cover"
+        src={game.header_image}
+        alt={game.name}
+      />
       <div
         className={`game-card__dim${dimmed ? " game-card__dim--always" : ""}`}
       />
@@ -53,13 +57,13 @@ export default function GameCard({
           />
         </span>
       </div>
-      {stars && (
+      {/* {stars && (
         <img
           className="game-card__stars"
           src="/assets/stars.svg"
           alt={`${game.rating} gwiazdek`}
         />
-      )}
+      )} */}
     </a>
   );
 }
