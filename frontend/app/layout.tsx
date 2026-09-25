@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
 import Header from "../components/Header/Header";
+import Messages from "../components/Message/Message";
 
 export const metadata: Metadata = {
   title: "Games Vault",
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body>
         <Header />
         {children}
+        <Messages />
       </body>
     </html>
   );

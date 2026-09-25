@@ -18,7 +18,6 @@ const sections = [
   },
 ];
 
-// ponytail: plain forms, no submit handlers — back-end has no settings route yet.
 export default function SettingsPage() {
   return (
     <main className="auth settings">

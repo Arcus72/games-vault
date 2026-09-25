@@ -1,7 +1,6 @@
 import Link from "next/link";
 import "../auth.css";
 
-// ponytail: plain form, no submit handler — back-end has no auth route yet.
 export default function LoginPage() {
   return (
     <main className="auth">

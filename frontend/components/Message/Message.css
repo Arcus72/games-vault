@@ -1,0 +1,33 @@
+.messages {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message {
+  padding: 12px 18px;
+  border-radius: var(--radius-btn);
+  color: var(--color-text);
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  animation: message-in 0.2s ease-out;
+
+  &.message--success {
+    background: #16a34a;
+  }
+
+  &.message--error {
+    background: #dc2626;
+  }
+}
+
+@keyframes message-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}

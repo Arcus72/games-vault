@@ -12,7 +12,7 @@ from auth.user_auth import authenticate_session, create_new_session, authenticat
 from database.functions import get_filtered_steam_games, get_searched_games, filter_user_library
 from database.models import Users, UserSession, SteamGames, SteamLanguages, SteamGenres, SteamTags, SteamPlatforms, UserGameLibrary, Tags, Platforms, Genres, Languages
 from fastapi.middleware.cors import CORSMiddleware
-from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters
+from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, GamesRequest
 
 app = FastAPI()
 
@@ -33,6 +33,7 @@ def set_user_session(response: Response, session: UserSession = Depends(authenti
     return {"message": "User session set successfully."}
 
 @app.get("/api/get_user_session")
+
 def get_user_session(session: UserSession = Depends(authenticate_session)):
     if session:
         return {"session_id": session.session_id, "user_id": session.user_id}
@@ -104,11 +105,12 @@ def logout(response: Response, user_session: UserSession = Depends(authenticate_
     return {"message": "Wylogowano pomyślnie."}
 
 @app.post("/api/get_steam_games", response_model=GamesFilterRespone)
-def get_steam_games(page: int = 1,  session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db), filters: GameFilter = Depends()) -> GamesFilterRespone:
+def get_steam_games(body: GamesRequest, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)) -> GamesFilterRespone:
+    page = body.page
+    filters = body.filters or GameFilter()
     page_size = 30
     if not page or page < 1:
         page = 1
-
     query = get_filtered_steam_games(db, filters).order_by(SteamGames.recommendations.desc())
     if session.user_id is not None:
         query = query.outerjoin(
@@ -192,12 +194,12 @@ def get_user_library(page: int = 1, db: Session = Depends(get_db), user_session:
 def games_search_bar(filter: str, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)):
     if filter is None or filter.strip() == "":
         raise HTTPException(status_code=400, detail="Searchbar jest pusty. Wprowadź nazwę gry lub jej fragment.")
-    page_size = 20
+    page_size = 6
     query = get_searched_games(db, filter)
     games = query.order_by(SteamGames.recommendations.desc()).limit(page_size).all()
 
     if not games:
-        raise HTTPException(status_code=404, detail="Nie znaleziono gier.")
+        raise HTTPException(status_code=400, detail="Nie znaleziono gier.")
     return [
         GameSearchRespone(
             appid=game.appid,
@@ -209,22 +211,22 @@ def games_search_bar(filter: str, session: UserSession = Depends(authenticate_se
 @app.get("/api/get_tags")
 def get_tags(db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
     tags = db.query(Tags).order_by(Tags.tag.asc()).all()
-    return [{"id": tag.id, "tag": tag.tag} for tag in tags]
+    return [tag.tag for tag in tags]
 
 @app.get("/api/get_platforms")
 def get_platforms(db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
     platforms = db.query(Platforms).order_by(Platforms.platform.asc()).all()
-    return [{"id": platform.id, "platform": platform.platform} for platform in platforms]
+    return [platform.platform for platform in platforms]
 
 @app.get("/api/get_genres")
 def get_genres(db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
     genres = db.query(Genres).order_by(Genres.genre.asc()).all()
-    return [{"id": genre.id, "genre": genre.genre} for genre in genres]
+    return [genre.genre for genre in genres]
 
 @app.get("/api/get_languages")
 def get_languages(db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
     languages = db.query(Languages).order_by(Languages.language.asc()).all()
-    return [{"id": language.id, "language": language.language} for language in languages]
+    return [language.language for language in languages]
 
 
 @app.post("/api/add_game_to_library")
@@ -291,7 +293,7 @@ def get_message(data: dict, session: UserSession = Depends(authenticate_session)
         "response": "This is the list of games that will suit you best:",
         "games": [
             {
-            "id": "g-9842",
+            "appid": "g-9842",
             "title": "The Witcher 3: Wild Hunt",
             "price": 129.99,
             "currency": "PLN",
@@ -300,7 +302,7 @@ def get_message(data: dict, session: UserSession = Depends(authenticate_session)
             "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/"
             },
             {
-            "id": "g-1105",
+            "appid": "g-1105",
             "title": "Cyberpunk 2077",
             "price": 199.9,
             "currency": "PLN",

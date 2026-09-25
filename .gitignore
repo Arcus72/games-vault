@@ -1,6 +1,6 @@
 .venv
 .env
-__pycache__
+__pycache__/
 *.pyc
 .git
 *.md
@@ -9,3 +9,4 @@ node_modules
 .env
 .git
 *.md
+TODO.txt

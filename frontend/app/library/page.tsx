@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import "./view-toggle.css";
-import FilterAside, {
-  FULL_FILTERS,
-} from "../../components/FilterAside/FilterAside";
+import FilterAside from "../../components/FilterAside/FilterAside";
 import GameCard from "../../components/GameCard/GameCard";
 import Pagination from "../../components/Pagination/Pagination";
 import Fab from "../../components/Fab/Fab";
 import { getGames } from "../../lib/api";
-import type { Game } from "../../interfaces";
+import type { Game } from "../../interfaces/main";
 
 const views = [
-  { id: "all", label: "Wszystkie" },
+  { id: "all", label: "Moje gry" },
   {
     id: "wishlist",
     label: "Lista życzeń",
@@ -33,11 +31,9 @@ export default function LibraryPage() {
       pagination: { currentPage: page, totalPages },
     }).then((res) => {
       setGames(res?.games ?? []);
-      setPage(res?.currentPage ?? 1);
-      setTotalPages(res?.totalPages ?? 1);
+      setPage(res?.page ?? 1);
+      setTotalPages(res?.pages ?? 1);
     });
-    // ponytail: totalPages is sent, not read back into the deps — it would re-fire the fetch on every response.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, view]);
 
   return (
@@ -53,20 +49,15 @@ export default function LibraryPage() {
                   className={`view-toggle__btn${view === v.id ? " view-toggle__btn--active" : ""}`}
                   onClick={() => setView(v.id)}
                 >
-                  {"icon" in v && (
-                    <img className="view-toggle__icon" src={v.icon} alt="" />
-                  )}
+                  {"icon" in v && <img className="view-toggle__icon" src={v.icon} alt="" />}
                   {v.label}
                 </button>
               ))}
             </div>
           </section>
           <FilterAside
-            filterConfig={FULL_FILTERS}
             onSave={(filters) =>
-              getGames({ page, filters }).then((res) =>
-                setGames(res?.games ?? []),
-              )
+              getGames({ page, filters }).then((res) => setGames(res?.games ?? []))
             }
           />
         </div>
@@ -83,19 +74,10 @@ export default function LibraryPage() {
           </div>
           <div className="grid">
             {games.map((g) => (
-              <GameCard
-                key={g.id}
-                game={g}
-                stars={g.hidden}
-                dimmed={g.hidden}
-              />
+              <GameCard key={g.id} game={g} stars={g.hidden} dimmed={g.hidden} />
             ))}
           </div>
-          <Pagination
-            currentPage={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
+          <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
         </section>
       </div>
       <Fab />

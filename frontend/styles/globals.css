@@ -91,7 +91,6 @@ a {
     height: 40px;
     padding: 0 34px 0 12px;
     background: var(--color-input-bg)
-      /* ponytail: chevron as inline SVG, no icon component */
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23efca08' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
       no-repeat right 12px center / 12px 8px;
     border: 1px solid var(--color-border-input);
@@ -120,6 +119,6 @@ a {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr));
   gap: 22px 32px;
 }

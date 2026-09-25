@@ -2,15 +2,13 @@
 
 import { useEffect, useState } from "react";
 import "./hero.css";
-import FilterAside, {
-  FULL_FILTERS,
-  type FilterValues,
-} from "../components/FilterAside/FilterAside";
+import FilterAside from "../components/FilterAside/FilterAside";
 import GameCard from "../components/GameCard/GameCard";
 import Pagination from "../components/Pagination/Pagination";
 import Fab from "../components/Fab/Fab";
 import { getGames } from "../lib/api";
-import type { Game } from "../interfaces";
+import type { Game } from "../interfaces/main";
+import { FilterValues } from "../interfaces/main";
 
 export default function MainPage() {
   const [games, setGames] = useState<Game[]>([]);
@@ -19,7 +17,9 @@ export default function MainPage() {
   const [filters, setFilters] = useState<FilterValues | null>(null);
 
   useEffect(() => {
-    getGames({ page, ...(filters && { filters }) }).then((res) => {
+    console.log("data:", { page, filters });
+
+    getGames({ page, filters }).then((res) => {
       console.log(res);
 
       setGames(res?.games ?? []);
@@ -40,11 +40,10 @@ export default function MainPage() {
             <span className="hero__title-accent">Epicką Przygodę</span>
           </h1>
           <p className="hero__text">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis neque
-            dui, aliquet ac nibh id, aliquet suscipit felis. Curabitur eleifend
-            purus quam, non congue lorem rutrum a. Sed dictum nunc ligula, et
-            dignissim diam bibendum ac. Nullam ut sapien non massa molestie
-            porta a nec quam. Pellentesque gravida urna non ex efficitur,
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis neque dui, aliquet ac nibh
+            id, aliquet suscipit felis. Curabitur eleifend purus quam, non congue lorem rutrum a.
+            Sed dictum nunc ligula, et dignissim diam bibendum ac. Nullam ut sapien non massa
+            molestie porta a nec quam. Pellentesque gravida urna non ex efficitur,
           </p>
         </div>
       </section>
@@ -52,7 +51,7 @@ export default function MainPage() {
 
       <div className="layout">
         <div className="layout__sidebar">
-          <FilterAside onSave={setFilters} filterConfig={FULL_FILTERS} />
+          <FilterAside onSave={setFilters} />
         </div>
         <section className="layout__content">
           <div className="sort-bar">
@@ -70,19 +69,10 @@ export default function MainPage() {
               <GameCard key={g.appid} game={g} />
             ))}
           </div>
-          <Pagination
-            currentPage={page}
-            setPage={setPage}
-            totalPages={totalPages}
-          />
+          <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
         </section>
       </div>
       <Fab />
     </main>
   );
 }
-
-//TODO: Extra search bar on top for dynamic search
-//TODO: Wszyskie -> moje gry
-//TODO: Platformy jako filtry
-//TODO: sortowanie na lewo do filtrów

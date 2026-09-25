@@ -22,6 +22,10 @@ class GameFilter(BaseModel):
     release_date_min_year: int | None = None
     release_date_max_year: int | None = None
 
+class GamesRequest(BaseModel):
+    page: int = 1
+    filters: GameFilter | None = None
+
 class UserLibraryFilters(GameFilter):
     library_wishlist: int | None = None    #    None -> Wszystkie Gry, 0 -> Biblioteka, 1 -> Wishlista
     hidden: int | None = None              #    None -> Wszystkie, 0 -> tylko nie ukryte, 1 -> tylko ukryte

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./Header.css";
+import DynamicSearchBar from "../DynamicSearchBar/DynamicSearchBar";
 
 const links = [
   { href: "/", label: "Galeria" },
@@ -32,19 +33,13 @@ export default function Header() {
           </Link>
         ))}
       </nav>
+      <DynamicSearchBar />
       <Link className="Header__userButton" href="/register">
         Zarejestruj się
       </Link>
       <Link className="Header__userButton" href="/login">
         Zaloguj
       </Link>
-      <span className="Header__avatar">
-        <img
-          className="Header__avatar-img"
-          src="/assets/avatar.png"
-          alt="Profil"
-        />
-      </span>
     </header>
   );
 }

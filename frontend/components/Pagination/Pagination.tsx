@@ -1,9 +1,7 @@
 import "./Pagination.css";
 
 function getPageNumbers(currentPage: number, totalPages: number) {
-  const sorted = [
-    ...new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1]),
-  ]
+  const sorted = [...new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1])]
     .filter((p) => p >= 1 && p <= totalPages)
     .sort((a, b) => a - b);
 

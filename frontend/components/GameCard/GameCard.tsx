@@ -1,4 +1,4 @@
-import type { Game } from "../../interfaces";
+import type { Game } from "../../interfaces/main";
 import "./GameCard.css";
 
 export default function GameCard({

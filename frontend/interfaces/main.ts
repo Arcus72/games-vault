@@ -4,14 +4,16 @@ export type FilterSection =
       type: "slider";
       label: string;
       name: string;
-      value: string;
-      steps?: string[];
+      value: number | null;
+      steps: { label: string; value: number | null }[];
       open?: boolean;
     }
   | {
       type: "range";
       label: string;
       name: string;
+      startName: string;
+      endName: string;
       startLabel?: string;
       endLabel?: string;
       open?: boolean;
@@ -33,16 +35,11 @@ export interface Game {
   isHidden: boolean | null;
   library_wishlist: boolean | null;
   release_date: string | null;
-}
-
-export interface GamesRes {
-  games: Game[];
-  page: number;
-  pages: number;
+  steam_url?: string;
 }
 
 export interface ChatGame {
-  id: string;
+  appid: string;
   title: string;
   price: number;
   currency: string;
@@ -51,8 +48,14 @@ export interface ChatGame {
   steamUrl: string;
 }
 
-export interface MessageResponse {
-  success: boolean;
-  response: string;
-  games: ChatGame[];
+export type FilterValues = Record<string, string | number | string[] | null>;
+
+export interface FilterData {
+  name: string | null;
+  genres: string[] | null;
+  price_max: number | null;
+  release_date_min_year: number | null;
+  release_date_max_year: number | null;
+  tags: string[] | null;
+  languages: string[] | null;
 }

@@ -1,0 +1,75 @@
+.DynamicSearchBar {
+  height: 50%;
+  position: relative;
+  .DynamicSearchBar__button {
+    background-color: #333333;
+    height: 100%;
+    padding: 5px;
+    border-radius: 10px;
+  }
+
+  .DynamicSearchBar__searchSVG {
+    height: 100%;
+  }
+
+  .DynamicSearchBar__inputSection {
+    display: none;
+    position: absolute;
+    right: 0;
+
+    input {
+      display: block;
+      width: 30ch;
+      height: 40px;
+      padding: 0 9px;
+      background: var(--color-input-bg);
+      border: 1px solid var(--color-border-input);
+      border-radius: 4px;
+      color: var(--color-text);
+      font-size: var(--font-size-base);
+      letter-spacing: var(--tracking);
+
+      &::placeholder {
+        color: var(--color-text-muted);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-yellow);
+      }
+    }
+  }
+
+  &:focus-within .DynamicSearchBar__inputSection {
+    display: block;
+  }
+
+  .DynamicSearchBar__games {
+    position: absolute;
+
+    right: 0;
+  }
+
+  .DynamicSearchBar__game {
+    margin-top: 2px;
+    background-color: var(--color-input-bg);
+    display: flex;
+  }
+
+  .DynamicSearchBar__gameName {
+    padding: 5px 20px 5px 10px;
+    text-wrap: nowrap;
+  }
+
+  .DynamicSearchBar__errorMessage {
+    position: absolute;
+    background-color: var(--color-input-bg);
+    right: 0;
+    padding-top: 10px;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+
+    color: var(--color-text);
+  }
+}

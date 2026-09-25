@@ -1,74 +1,104 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./FilterAside.css";
-import { FilterSection } from "../../interfaces";
+import { FilterSection, FilterValues } from "../../interfaces/main";
+import Section from "./Section";
+import { loadAtributeListForFilter } from "@/lib/api";
 
-/** Current value of every filter, keyed by section name. */
-export type FilterValues = Record<
-  string,
-  string | string[] | { start: string | null; end: string | null } | null
->;
+async function getConfig(): Promise<FilterSection[]> {
+  const tags = await loadAtributeListForFilter("/api/get_tags", "gameTags");
 
-// ponytail: these option strings are also the values POSTed to /api/games — back-end must match.
-export const FULL_FILTERS: FilterSection[] = [
-  { type: "search", name: "name" },
-  {
-    type: "slider",
-    label: "zakres cen",
-    name: "maxPrice",
-    value: "poniżej 10$",
-    steps: [
-      "Za darmo",
-      "poniżej 5$",
-      "poniżej 10$",
-      "poniżej 20$",
-      "poniżej 50$",
-      "Bez limitu",
-    ],
-    open: true,
-  },
-  { type: "range", label: "Zakres lat", name: "yearSpan", open: true },
-  {
-    type: "checkboxes",
-    label: "Tagi",
-    name: "tags",
-    options: ["RPG", "Przygodowe", "Niezależne", "Akcja"],
-    checked: ["RPG"],
-    open: true,
-  },
-  {
-    type: "checkboxes",
-    label: "Języki",
-    name: "languages",
-    options: ["Angielski", "Polski", "Niemiecki", "Francuski"],
-  },
-];
+  const platforms = await loadAtributeListForFilter("/api/get_platforms", "gamePlatforms");
+
+  const genres = await loadAtributeListForFilter("/api/get_genres", "gameGenres");
+
+  const languages = await loadAtributeListForFilter("/api/get_languages", "gamelanguages");
+
+  return [
+    { type: "search", name: "name" },
+    {
+      type: "slider",
+      label: "zakres cen",
+      name: "price_max",
+      value: null,
+      steps: [
+        { label: "Za darmo", value: 0 },
+        { label: "poniżej 5$", value: 5 },
+        { label: "poniżej 10$", value: 10 },
+        { label: "poniżej 20$", value: 20 },
+        { label: "poniżej 50$", value: 50 },
+        { label: "Bez limitu", value: null },
+      ],
+      open: true,
+    },
+    {
+      type: "range",
+      label: "Zakres lat",
+      name: "yearSpan",
+      startName: "release_date_min_year",
+      endName: "release_date_max_year",
+      open: true,
+    },
+    {
+      type: "checkboxes",
+      label: "Tagi",
+      name: "tags",
+      options: tags || [""],
+      open: true,
+    },
+    {
+      type: "checkboxes",
+      label: "Języki",
+      name: "languages",
+      options: languages || [""],
+    },
+    {
+      type: "checkboxes",
+      label: "Platformy",
+      name: "platforms",
+      options: platforms || [""],
+    },
+    {
+      type: "checkboxes",
+      label: "Kategorie",
+      name: "genres",
+      options: genres || [""],
+    },
+  ];
+}
 
 function initialValues(filterConfig: FilterSection[]): FilterValues {
   const values: FilterValues = {};
   filterConfig.forEach((s) => {
     if (s.type === "search") values[s.name] = null;
     else if (s.type === "slider") values[s.name] = s.value;
-    else if (s.type === "range") values[s.name] = { start: null, end: null };
-    else {
-      values[s.name] = s.checked ?? [];
+    else if (s.type === "range") {
+      values[s.startName] = null;
+      values[s.endName] = null;
+    } else {
+      values[s.name] = s.checked?.length ? s.checked : null;
     }
   });
   return values;
 }
 
 export default function FilterAside({
-  filterConfig,
   onSave,
   onChange,
 }: {
-  filterConfig: FilterSection[];
   onSave?: (values: FilterValues) => void;
-  /** Called with the full value set after every single change. */
   onChange?: (values: FilterValues) => void;
 }) {
-  const [values, setValues] = useState(() => initialValues(filterConfig));
+  const [config, setConfig] = useState<FilterSection[]>([]);
+  const [values, setValues] = useState<FilterValues>({});
+
+  useEffect(() => {
+    getConfig().then((c) => {
+      setConfig(c);
+      setValues(initialValues(c));
+    });
+  }, []);
 
   const set = (key: string, value: FilterValues[string]) => {
     const next = { ...values, [key]: value };
@@ -79,20 +109,17 @@ export default function FilterAside({
   return (
     <aside className="filters">
       <h2 className="filters__title">Filtry:</h2>
-      {filterConfig.map((s) => (
+      {config.map((s) => (
         <Section key={s.name} section={s} values={values} set={set} />
       ))}
       <div className="filters__buttons">
-        <button
-          className="filters__btn filters__btn--save"
-          onClick={() => onSave?.(values)}
-        >
+        <button className="filters__btn filters__btn--save" onClick={() => onSave?.(values)}>
           Zapisz
         </button>
         <button
           className="filters__btn filters__btn--reset"
           onClick={() => {
-            const initial = initialValues(filterConfig);
+            const initial = initialValues(config);
             setValues(initial);
             onChange?.(initial);
           }}
@@ -101,118 +128,5 @@ export default function FilterAside({
         </button>
       </div>
     </aside>
-  );
-}
-
-function Slider({
-  section: s,
-  value,
-  set,
-}: {
-  section: Extract<FilterSection, { type: "slider" }>;
-  value: string;
-  set: (key: string, value: FilterValues[string]) => void;
-}) {
-  const steps = s.steps ?? [s.value];
-  const index = Math.max(0, steps.indexOf(value));
-  const percent = steps.length > 1 ? (index / (steps.length - 1)) * 100 : 0;
-
-  return (
-    <div className="filters__slider">
-      <input
-        className="filters__slider-input"
-        type="range"
-        min={0}
-        max={steps.length - 1}
-        step={1}
-        value={index}
-        style={{ ["--filters-slider-fill" as string]: `${percent}%` }}
-        onChange={(e) => set(s.name, steps[Number(e.target.value)])}
-      />
-      <p className="filters__slider-value">{steps[index]}</p>
-    </div>
-  );
-}
-
-function Section({
-  section: s,
-  values,
-  set,
-}: {
-  section: FilterSection;
-  values: FilterValues;
-  set: (key: string, value: FilterValues[string]) => void;
-}) {
-  if (s.type === "search") {
-    return (
-      <input
-        className="filters__search"
-        placeholder={s.placeholder ?? "Szukaj po nazwie"}
-        value={(values[s.name] as string) ?? ""}
-        onChange={(e) => set(s.name, e.target.value)}
-      />
-    );
-  }
-
-  const range =
-    s.type === "range"
-      ? (values[s.name] as { start: string | null; end: string | null })
-      : null;
-  const checked = s.type === "checkboxes" ? (values[s.name] as string[]) : null;
-
-  return (
-    <details className="filters__section" open={s.open}>
-      <summary className="filters__header">
-        <span className="filters__label">{s.label}</span>
-        <span className="filters__chevron">&gt;</span>
-      </summary>
-
-      {s.type === "slider" && (
-        <Slider section={s} value={values[s.name] as string} set={set} />
-      )}
-
-      {s.type === "range" && range && (
-        <div className="filters__year">
-          <input
-            className="filters__year-input"
-            placeholder={s.startLabel ?? "Od"}
-            value={range.start ?? ""}
-            onChange={(e) => set(s.name, { ...range, start: e.target.value })}
-          />
-          <span className="filters__year-dash" />
-          <input
-            className="filters__year-input"
-            placeholder={s.endLabel ?? "Do"}
-            value={range.end ?? ""}
-            onChange={(e) => set(s.name, { ...range, end: e.target.value })}
-          />
-        </div>
-      )}
-
-      {s.type === "checkboxes" && checked && (
-        <div className="filters__tags">
-          {s.options.map((option) => (
-            <label className="filters__tag" key={option}>
-              <input
-                className="filters__tag-input"
-                type="checkbox"
-                checked={checked.includes(option)}
-                onChange={(e) =>
-                  set(
-                    s.name,
-                    e.target.checked
-                      ? [...checked, option]
-                      : checked.filter((o) => o !== option),
-                  )
-                }
-              />
-              <span className="filters__tag-box" />
-              <span className="filters__tag-name">{option}</span>
-            </label>
-          ))}
-          {/* <input className="filters__search" placeholder="Szukaj po nazwie" /> */}
-        </div>
-      )}
-    </details>
   );
 }
