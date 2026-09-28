@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./FilterAside.css";
+import "./FilterAside.scss";
 import { FilterSection, FilterValues } from "../../interfaces/main";
 import Section from "./Section";
 import { loadAtributeListForFilter } from "@/lib/api";
@@ -107,17 +107,17 @@ export default function FilterAside({
   };
 
   return (
-    <aside className="filters">
-      <h2 className="filters__title">Filtry:</h2>
+    <aside className="FilterAside">
+      <h2 className="FilterAside__title">Filtry:</h2>
       {config.map((s) => (
         <Section key={s.name} section={s} values={values} set={set} />
       ))}
-      <div className="filters__buttons">
-        <button className="filters__btn filters__btn--save" onClick={() => onSave?.(values)}>
+      <div className="FilterAside__buttons">
+        <button className="FilterAside__btn FilterAside__btn--save" onClick={() => onSave?.(values)}>
           Zapisz
         </button>
         <button
-          className="filters__btn filters__btn--reset"
+          className="FilterAside__btn FilterAside__btn--reset"
           onClick={() => {
             const initial = initialValues(config);
             setValues(initial);

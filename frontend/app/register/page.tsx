@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import Link from "next/link";
-import "../auth.css";
+import "../auth.scss";
 import { createUser } from "@/lib/api";
 import { CreateUserData } from "@/interfaces/api";
 import { showMessage } from "@/components/Message/Message";

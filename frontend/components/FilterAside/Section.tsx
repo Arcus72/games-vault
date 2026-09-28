@@ -16,7 +16,7 @@ export default function Section({
   if (s.type === "search") {
     return (
       <input
-        className="filters__search"
+        className="FilterAside__search"
         placeholder={s.placeholder ?? "Szukaj po nazwie"}
         value={(values[s.name] as string) ?? ""}
         onChange={(e) => set(s.name, e.target.value || null)}
@@ -39,10 +39,10 @@ export default function Section({
       : [];
 
   return (
-    <details className="filters__section" open={s.open}>
-      <summary className="filters__header">
-        <span className="filters__label">{s.label}</span>
-        <span className="filters__chevron">&gt;</span>
+    <details className="FilterAside__section" open={s.open}>
+      <summary className="FilterAside__header">
+        <span className="FilterAside__label">{s.label}</span>
+        <span className="FilterAside__chevron">&gt;</span>
       </summary>
 
       {s.type === "slider" && (
@@ -50,16 +50,16 @@ export default function Section({
       )}
 
       {s.type === "range" && (
-        <div className="filters__year">
+        <div className="FilterAside__year">
           <input
-            className="filters__year-input"
+            className="FilterAside__year-input"
             placeholder={s.startLabel ?? "Od"}
             value={(values[s.startName] as string) ?? ""}
             onChange={(e) => set(s.startName, e.target.value || null)}
           />
-          <span className="filters__year-dash" />
+          <span className="FilterAside__year-dash" />
           <input
-            className="filters__year-input"
+            className="FilterAside__year-input"
             placeholder={s.endLabel ?? "Do"}
             value={(values[s.endName] as string) ?? ""}
             onChange={(e) => set(s.endName, e.target.value || null)}
@@ -68,11 +68,11 @@ export default function Section({
       )}
 
       {s.type === "checkboxes" && checked && (
-        <div className="filters__tags">
+        <div className="FilterAside__tags">
           {visibleOptions.map((option) => (
-            <label className="filters__tag" key={option}>
+            <label className="FilterAside__tag" key={option}>
               <input
-                className="filters__tag-input"
+                className="FilterAside__tag-input"
                 type="checkbox"
                 checked={checked.includes(option)}
                 onChange={(e) => {
@@ -82,12 +82,12 @@ export default function Section({
                   set(s.name, next.length ? next : null); // [] would filter to zero games
                 }}
               />
-              <span className="filters__tag-box" />
-              <span className="filters__tag-name">{option}</span>
+              <span className="FilterAside__tag-box" />
+              <span className="FilterAside__tag-name">{option}</span>
             </label>
           ))}
           <input
-            className="filters__search"
+            className="FilterAside__search"
             placeholder="Szukaj po nazwie"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

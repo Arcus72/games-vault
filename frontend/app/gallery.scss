@@ -1,9 +1,12 @@
-.hero {
+@use "../styles/variables" as *;
+@use "../styles/fonts" as *;
+
+.Gallery {
   position: relative;
   height: 412px;
   overflow: hidden;
 
-  .hero__bg {
+  &__bg {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -12,7 +15,7 @@
     opacity: 0.6;
   }
 
-  .hero__overlay {
+  &__overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(
@@ -24,14 +27,14 @@
     );
   }
 
-  .hero__content {
+  &__content {
     position: relative;
     max-width: 900px;
     margin: 0 auto;
     padding: 53px 20px 0;
   }
 
-  .hero__title {
+  &__title {
     font-size: 50px;
     font-weight: 900;
     letter-spacing: -2.88px;
@@ -39,7 +42,7 @@
     text-shadow: 0 4px 4px rgba(0, 0, 0, 0.49);
   }
 
-  .hero__title-underline {
+  &__titleUnderline {
     position: relative;
     z-index: 4;
 
@@ -51,18 +54,18 @@
       left: 0;
       width: 100%;
       height: 12px;
-      background-color: var(--color-orange);
+      background-color: $color-orange;
     }
   }
 
-  .hero__title-accent {
-    color: var(--color-yellow);
+  &__titleAccent {
+    color: $color-yellow;
   }
 
-  .hero__text {
+  &__text {
     margin-top: 24px;
     max-width: 734px;
-    font-size: var(--font-size-md);
+    font-size: $font-size-md;
     line-height: 1.6;
     color: #e4bfb1;
   }
@@ -72,23 +75,23 @@
     min-height: 260px;
     padding-bottom: 30px;
 
-    .hero__content {
+    &__content {
       padding: 30px 16px 0;
     }
 
-    .hero__title {
-      font-size: var(--font-size-2xl);
+    &__title {
+      font-size: $font-size-2xl;
       letter-spacing: -1px;
     }
 
-    .hero__title-underline {
+    &__titleUnderline {
       border-bottom-width: 4px;
     }
   }
 }
 
-/* sibling of .hero in the DOM, so it can't nest inside it */
-.hero__strip {
+/* sibling of .Gallery in the DOM, so it can't nest inside it */
+.Gallery__strip {
   height: 45px;
   background-image: repeating-linear-gradient(
     135deg,

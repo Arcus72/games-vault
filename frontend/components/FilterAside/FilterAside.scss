@@ -1,42 +1,45 @@
-.filters {
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.FilterAside {
   padding: 26px 0 40px;
 
-  .filters__title {
-    font-size: var(--font-size-xl);
+  &__title {
+    font-size: $font-size-xl;
     font-weight: 800;
-    letter-spacing: var(--tracking);
-    color: var(--color-text-soft);
+    letter-spacing: $tracking;
+    color: $color-text-soft;
     margin: 0 0 20px 22px;
   }
 
-  .filters__search {
+  &__search {
     display: block;
     width: min(345px, calc(100% - 32px));
     height: 40px;
     margin: 0 auto 20px;
     padding: 0 9px;
-    background: var(--color-input-bg);
-    border: 1px solid var(--color-border-input);
+    background: $color-input-bg;
+    border: 1px solid $color-border-input;
     border-radius: 4px;
-    color: var(--color-text);
-    font-size: var(--font-size-base);
-    letter-spacing: var(--tracking);
+    color: $color-text;
+    font-size: $font-size-base;
+    letter-spacing: $tracking;
 
     &::placeholder {
-      color: var(--color-text-muted);
+      color: $color-text-muted;
     }
   }
 
-  .filters__section {
-    border-top: 1px solid var(--color-border);
+  &__section {
+    border-top: 1px solid $color-border;
     padding: 10px 0 16px;
-
-    &[open] .filters__chevron {
-      transform: rotate(90deg); /* open: points down */
-    }
   }
 
-  .filters__header {
+  &__section[open] &__chevron {
+    transform: rotate(90deg); /* open: points down */
+  }
+
+  &__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -50,25 +53,26 @@
     }
   }
 
-  .filters__label {
-    font-size: var(--font-size-sm);
+  &__label {
+    font-size: $font-size-sm;
     font-weight: 700;
-    color: var(--color-text-label);
+    color: $color-text-label;
   }
 
-  .filters__chevron {
-    font-size: var(--font-size-sm);
+  &__chevron {
+    font-size: $font-size-sm;
     font-weight: 700;
-    color: var(--color-border-dim);
+    color: $color-border-dim;
     transform: rotate(0deg); /* closed: points right */
     transition: transform 0.2s;
   }
 
-  .filters__slider {
+  &__slider {
     padding: 30px 23px 0;
   }
 
-  .filters__slider-input {
+  // --filters-slider-fill is set per-instance via inline style in Slider.tsx — must stay a CSS custom prop, $vars are compile-time only
+  &__slider-input {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
@@ -81,21 +85,21 @@
       border-radius: 2px;
       background: linear-gradient(
         to right,
-        var(--color-yellow) var(--filters-slider-fill),
-        var(--color-border-dim) var(--filters-slider-fill)
+        $color-yellow var(--filters-slider-fill),
+        $color-border-dim var(--filters-slider-fill)
       );
     }
 
     &::-moz-range-track {
       height: 3px;
       border-radius: 2px;
-      background: var(--color-border-dim);
+      background: $color-border-dim;
     }
 
     &::-moz-range-progress {
       height: 3px;
       border-radius: 2px;
-      background: var(--color-yellow);
+      background: $color-yellow;
     }
 
     &::-webkit-slider-thumb {
@@ -105,7 +109,7 @@
       width: 15px;
       height: 15px;
       border-radius: 50%;
-      background: var(--color-yellow);
+      background: $color-yellow;
       box-shadow: 0 0 10px rgba(239, 202, 8, 0.8);
     }
 
@@ -114,18 +118,18 @@
       width: 15px;
       height: 15px;
       border-radius: 50%;
-      background: var(--color-yellow);
+      background: $color-yellow;
       box-shadow: 0 0 10px rgba(239, 202, 8, 0.8);
     }
   }
 
-  .filters__slider-value {
+  &__slider-value {
     margin: 14px 0 0 0;
-    font-size: var(--font-size-lg);
+    font-size: $font-size-lg;
     font-weight: 500;
   }
 
-  .filters__year {
+  &__year {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -133,91 +137,91 @@
     padding-top: 22px;
   }
 
-  .filters__year-input {
+  &__year-input {
     width: 103px;
     height: 38px;
     background: rgba(92, 92, 92, 0.32);
-    border: 1px solid var(--color-yellow);
-    border-radius: var(--radius-btn);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-lg);
+    border: 1px solid $color-yellow;
+    border-radius: $radius-btn;
+    color: $color-text-muted;
+    font-size: $font-size-lg;
     font-weight: 500;
     text-align: center;
 
     &::placeholder {
-      color: var(--color-text-muted);
+      color: $color-text-muted;
     }
   }
 
-  .filters__year-dash {
+  &__year-dash {
     width: 34px;
     height: 2px;
-    background: var(--color-border-dim);
+    background: $color-border-dim;
   }
 
-  .filters__tags {
+  &__tags {
     display: flex;
     flex-direction: column;
     gap: 17px;
     padding: 20px 0 0 22px;
   }
 
-  .filters__tag {
+  &__tag {
     display: flex;
     align-items: center;
     gap: 17px;
     cursor: pointer;
-    font-size: var(--font-size-lg);
+    font-size: $font-size-lg;
     font-weight: 500;
   }
 
-  .filters__tag-input {
+  &__tag-input {
     display: none;
+  }
 
-    &:checked + .filters__tag-box {
-      background: rgba(239, 202, 8, 0.33);
+  &__tag-input:checked + &__tag-box {
+    background: rgba(239, 202, 8, 0.33);
 
-      &::after {
-        content: '✓';
-        color: var(--color-yellow);
-        font-size: var(--font-size-md);
-        font-weight: 500;
-      }
+    &::after {
+      content: '✓';
+      color: $color-yellow;
+      font-size: $font-size-md;
+      font-weight: 500;
     }
   }
 
-  .filters__tag-box {
+  &__tag-box {
     width: 22px;
     height: 22px;
-    border: 1px solid var(--color-yellow);
+    border: 1px solid $color-yellow;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .filters__buttons {
+  &__buttons {
     display: flex;
     gap: 14px;
     padding: 20px 15px 0;
   }
 
-  .filters__btn {
+  &__btn {
     flex: 1;
     height: 46px;
-    border-radius: var(--radius-btn);
-    font-size: var(--font-size-xl);
+    border-radius: $radius-btn;
+    font-size: $font-size-xl;
     font-weight: 500;
-    color: var(--color-text);
+    color: $color-text;
 
-    &.filters__btn--save {
-      background: var(--grad-brand);
+    &--save {
+      background: $grad-brand;
       text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
     }
 
-    &.filters__btn--reset {
+    &--reset {
       background: rgba(92, 92, 92, 0.32);
-      border: 2px solid var(--color-border-gray);
+      border: 2px solid $color-border-gray;
     }
   }
 }

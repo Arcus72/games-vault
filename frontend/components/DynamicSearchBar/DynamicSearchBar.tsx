@@ -1,5 +1,5 @@
 "use client";
-import "./DynamicSearchBar.css";
+import "./DynamicSearchBar.scss";
 import { getSearchResults } from "@/lib/api";
 import { useRef, useState } from "react";
 import { SearchBarGame } from "@/interfaces/api";

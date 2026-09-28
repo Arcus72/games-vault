@@ -1,5 +1,5 @@
-import "../auth.css";
-import "./settings.css";
+import "../auth.scss";
+import "./settings.scss";
 
 const sections = [
   {

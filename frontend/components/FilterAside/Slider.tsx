@@ -14,9 +14,9 @@ export default function Slider({
   const percent = steps.length > 1 ? (index / (steps.length - 1)) * 100 : 0;
 
   return (
-    <div className="filters__slider">
+    <div className="FilterAside__slider">
       <input
-        className="filters__slider-input"
+        className="FilterAside__slider-input"
         type="range"
         min={0}
         max={steps.length - 1}
@@ -25,7 +25,7 @@ export default function Slider({
         style={{ ["--filters-slider-fill" as string]: `${percent}%` }}
         onChange={(e) => set(s.name, steps[Number(e.target.value)].value)}
       />
-      <p className="filters__slider-value">{steps[index].label}</p>
+      <p className="FilterAside__slider-value">{steps[index].label}</p>
     </div>
   );
 }

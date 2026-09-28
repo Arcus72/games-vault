@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./hero.css";
+import "./gallery.scss";
 import FilterAside from "../components/FilterAside/FilterAside";
 import GameCard from "../components/GameCard/GameCard";
 import Pagination from "../components/Pagination/Pagination";
@@ -26,16 +26,16 @@ export default function MainPage() {
 
   return (
     <main className="page">
-      <section className="hero">
-        <img className="hero__bg" src="/assets/hero.png" alt="" />
-        <div className="hero__overlay" />
-        <div className="hero__content">
-          <h1 className="hero__title">
-            Odkryj <span className="hero__title-underline">Swoją</span> Następną
+      <section className="Gallery">
+        <img className="Gallery__bg" src="/assets/hero.png" alt="" />
+        <div className="Gallery__overlay" />
+        <div className="Gallery__content">
+          <h1 className="Gallery__title">
+            Odkryj <span className="Gallery__titleUnderline">Swoją</span> Następną
             <br />
-            <span className="hero__title-accent">Epicką Przygodę</span>
+            <span className="Gallery__titleAccent">Epicką Przygodę</span>
           </h1>
-          <p className="hero__text">
+          <p className="Gallery__text">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis neque dui, aliquet ac nibh
             id, aliquet suscipit felis. Curabitur eleifend purus quam, non congue lorem rutrum a.
             Sed dictum nunc ligula, et dignissim diam bibendum ac. Nullam ut sapien non massa
@@ -43,7 +43,7 @@ export default function MainPage() {
           </p>
         </div>
       </section>
-      <div className="hero__strip" />
+      <div className="Gallery__strip" />
 
       <div className="layout">
         <div className="layout__sidebar">

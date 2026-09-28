@@ -1,0 +1,47 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.Library {
+  padding: 0 10px 24px;
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    color: $color-text-soft;
+    margin: 0 0 12px 13px;
+  }
+
+  &__group {
+    display: flex;
+    align-items: center;
+    height: 45px;
+    padding: 3px;
+    background: $color-panel-dark;
+    border: 1px solid $color-border;
+    border-radius: $radius-input;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 39px;
+    border-radius: $radius-input;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    color: #67675b;
+
+    &--active {
+      background: linear-gradient(92deg, $color-yellow 1%, $color-orange 98%);
+      color: $color-panel-dark;
+    }
+  }
+
+  &__icon {
+    height: 12px;
+  }
+}

@@ -1,10 +1,13 @@
-.game-card {
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.GameCard {
   position: relative;
   aspect-ratio: 460 / 215;
   border-radius: 15px;
   overflow: hidden;
 
-  .game-card__cover {
+  &__cover {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -12,7 +15,7 @@
     object-fit: cover;
   }
 
-  .game-card__name-plate {
+  &__namePlate {
     position: absolute;
     left: 0;
     bottom: 12px;
@@ -20,38 +23,38 @@
     width: 165px;
     display: flex;
     align-items: center;
-    background: linear-gradient(90deg, var(--color-black) 37.5%, rgba(0, 0, 0, 0) 100%);
+    background: linear-gradient(90deg, $color-black 37.5%, rgba(0, 0, 0, 0) 100%);
   }
 
-  .game-card__name-bar {
+  &__nameBar {
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
     width: 4px;
-    background: var(--color-yellow);
+    background: $color-yellow;
   }
 
-  .game-card__name {
+  &__name {
     padding-left: 16px;
-    font-size: var(--font-size-base);
+    font-size: $font-size-base;
     font-weight: 500;
     white-space: nowrap;
   }
 
-  .game-card__price {
+  &__price {
     position: absolute;
     top: 11px;
     right: 9px;
     padding: 4px 7px;
     background: rgba(12, 12, 12, 0.83);
     border-radius: 6px;
-    font-size: var(--font-size-base);
+    font-size: $font-size-base;
     font-weight: 500;
   }
 
   /* badges stay hidden until the card is hovered */
-  .game-card__badges {
+  &__badges {
     position: absolute;
     top: 5px;
     left: 7px;
@@ -67,25 +70,23 @@
     @media (hover: none) {
       opacity: 1;
     }
-  }
 
-  &:hover {
-    .game-card__badges,
-    .game-card__dim {
+    &--show {
       opacity: 1;
     }
   }
 
-  .game-card__badges--show {
+  &:hover &__badges,
+  &:hover &__dim {
     opacity: 1;
   }
 
-  .game-card__badge {
+  &__badge {
     position: relative;
     z-index: 1;
     width: 27px;
     height: 27px;
-    border: 1px solid var(--color-border-gray);
+    border: 1px solid $color-border-gray;
     background: rgba(255, 255, 255, 0.12);
     border-radius: 50%;
     cursor: pointer;
@@ -93,13 +94,14 @@
     &:hover {
       background: rgba(255, 255, 255, 0.22);
     }
+
+    &--show {
+      background-color: $color-yellow;
+    }
   }
 
-  .game-card__badge--show {
-    background-color: var(--color-yellow);
-  }
-
-  .game-card__badge-slider {
+  // --i is set per-instance via inline style in GameCard.tsx — must stay a CSS custom prop, $vars are compile-time only
+  &__badgeSlider {
     position: absolute;
     z-index: 0;
     top: 2px;
@@ -107,19 +109,19 @@
     width: 27px;
     height: 27px;
     border-radius: 50%;
-    background: var(--color-yellow);
+    background: $color-yellow;
     transform: translateX(calc(var(--i) * 31px));
     transition: transform 0.2s ease;
   }
 
-  .game-card__badge-icon {
+  &__badgeIcon {
     position: absolute;
     inset: 0;
     margin: auto;
     width: 17px;
   }
 
-  .game-card__stars {
+  &__stars {
     position: absolute;
     right: 9px;
     bottom: 8px;

@@ -39,7 +39,7 @@ export interface Game {
 }
 
 export interface ChatGame {
-  appid: string;
+  appid: number;
   title: string;
   price: number;
   currency: string;

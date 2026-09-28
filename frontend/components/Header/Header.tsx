@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import "./Header.css";
+import "./Header.scss";
 import DynamicSearchBar from "../DynamicSearchBar/DynamicSearchBar";
 import { useAuth } from "@/context/AuthContext";
 import { logoutUser } from "@/lib/api";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 const links = [
   { href: "/", label: "Galeria" },
   { href: "/library", label: "Moja biblioteka" },
-  { href: "/chatbot", label: "Czat bot" },
+  { href: "/chatbot", label: "Chat bot" },
 ];
 
 export default function Header() {
@@ -36,7 +36,7 @@ export default function Header() {
       <Link className="Header__brand" href="/">
         <img className="Header__chest" src="/assets/chest.svg" alt="" />
         <span className="Header__title">
-          Games <span className="Header__title-accent">Vault</span>
+          Games <span className="Header__titleAccent">Vault</span>
         </span>
       </Link>
       <nav className="Header__nav">

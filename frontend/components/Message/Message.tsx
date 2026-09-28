@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./Message.css";
+import "./Message.scss";
 
 type MessageType = "success" | "error";
 type Msg = { id: number; text: string; type: MessageType };
@@ -24,9 +24,9 @@ export default function Messages() {
   }, []);
 
   return (
-    <div className="messages" role="status" aria-live="polite">
+    <div className="Message" role="status" aria-live="polite">
       {messages.map((m) => (
-        <div key={m.id} className={`message message--${m.type}`}>
+        <div key={m.id} className={`Message__item Message__item--${m.type}`}>
           {m.text}
         </div>
       ))}

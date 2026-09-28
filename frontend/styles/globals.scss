@@ -1,5 +1,5 @@
-@import "./variables.css";
-@import "./fonts.css";
+@use "./variables" as *;
+@use "./fonts" as *;
 
 * {
   box-sizing: border-box;
@@ -8,8 +8,8 @@
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: $color-bg;
+  color: $color-text;
   font-family: "Inter", system-ui, sans-serif;
 }
 
@@ -38,13 +38,13 @@ a {
     padding-top: 45px;
   }
 
-  .layout__sidebar {
-    width: var(--sidebar-width);
+  &__sidebar {
+    width: $sidebar-width;
     flex-shrink: 0;
-    border-right: 1px solid var(--color-border);
+    border-right: 1px solid $color-border;
   }
 
-  .layout__content {
+  &__content {
     flex: 1;
     padding: 16px 28px 40px;
   }
@@ -56,13 +56,13 @@ a {
       padding-top: 20px;
     }
 
-    .layout__sidebar {
+    &__sidebar {
       width: 100%;
       border-right: none;
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 1px solid $color-border;
     }
 
-    .layout__content {
+    &__content {
       width: 100%;
       padding: 16px 16px 40px;
     }
@@ -75,44 +75,39 @@ a {
   justify-content: flex-end;
   gap: 10px;
   margin-bottom: 10px;
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
   font-weight: 700;
-  letter-spacing: var(--tracking);
+  letter-spacing: $tracking;
   text-transform: uppercase;
-  color: var(--color-text-label);
-
-  .sort-bar__img {
-    width: 221px;
-    height: 52px;
-  }
+  color: $color-text-label;
 
   select {
     appearance: none;
     height: 40px;
     padding: 0 34px 0 12px;
-    background: var(--color-input-bg)
+    background: $color-input-bg
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23efca08' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
       no-repeat right 12px center / 12px 8px;
-    border: 1px solid var(--color-border-input);
-    border-radius: var(--radius-btn);
-    color: var(--color-text-soft);
+    border: 1px solid $color-border-input;
+    border-radius: $radius-btn;
+    color: $color-text-soft;
     font: inherit;
-    font-size: var(--font-size-base);
+    font-size: $font-size-base;
     text-transform: none;
     cursor: pointer;
 
     &:hover {
-      border-color: var(--color-border-gray);
+      border-color: $color-border-gray;
     }
 
     &:focus-visible {
       outline: none;
-      border-color: var(--color-yellow);
+      border-color: $color-yellow;
     }
 
     option {
-      background: var(--color-panel);
-      color: var(--color-text-soft);
+      background: $color-panel;
+      color: $color-text-soft;
     }
   }
 }

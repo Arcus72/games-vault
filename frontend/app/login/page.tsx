@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import "../auth.css";
+import "../auth.scss";
 import { loginUser } from "@/lib/api";
 import { showMessage } from "@/components/Message/Message";
 import { LoginData } from "@/interfaces/api";

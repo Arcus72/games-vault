@@ -1,3 +1,6 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
 /* /ustawienia — reuses the .auth input styles, only the boxed sections are new. */
 
 .auth.settings {
@@ -11,16 +14,16 @@
 
   .settings__box {
     padding: 4px 22px 26px;
-    border: 1px solid var(--color-yellow);
-    border-radius: var(--radius-panel);
+    border: 1px solid $color-yellow;
+    border-radius: $radius-panel;
   }
 
   .settings__legend {
     padding: 0 10px;
-    font-size: var(--font-size-xl);
+    font-size: $font-size-xl;
     font-weight: 800;
-    letter-spacing: var(--tracking);
-    color: var(--color-text);
+    letter-spacing: $tracking;
+    color: $color-text;
   }
 
   .settings__field {

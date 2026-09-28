@@ -1,4 +1,4 @@
-import "./Pagination.css";
+import "./Pagination.scss";
 
 function getPageNumbers(currentPage: number, totalPages: number) {
   const sorted = [...new Set([1, totalPages, currentPage - 1, currentPage, currentPage + 1])]
@@ -20,16 +20,16 @@ export default function Pagination({
   setPage: (newPage: number) => void;
 }) {
   return (
-    <nav className="pagination">
+    <nav className="Pagination">
       {getPageNumbers(currentPage, totalPages).map((page, i) =>
         page === "..." ? (
-          <span key={`dots-${i}`} className="pagination__dots">
+          <span key={`dots-${i}`} className="Pagination__dots">
             ...
           </span>
         ) : (
           <button
             key={page}
-            className={`pagination__btn${page === currentPage ? " pagination__btn--active" : ""}`}
+            className={`Pagination__btn${page === currentPage ? " Pagination__btn--active" : ""}`}
             onClick={() => setPage(page)}
           >
             {page}

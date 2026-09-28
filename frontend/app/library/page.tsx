@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./view-toggle.css";
+import "./library.scss";
 import FilterAside from "../../components/FilterAside/FilterAside";
 import GameCard from "../../components/GameCard/GameCard";
 import Pagination from "../../components/Pagination/Pagination";
@@ -40,16 +40,16 @@ export default function LibraryPage() {
     <main className="page">
       <div className="layout layout--library">
         <div className="layout__sidebar">
-          <section className="view-toggle">
-            <h2 className="view-toggle__title">Widok</h2>
-            <div className="view-toggle__group">
+          <section className="Library">
+            <h2 className="Library__title">Widok</h2>
+            <div className="Library__group">
               {views.map((v) => (
                 <button
                   key={v.id}
-                  className={`view-toggle__btn${view === v.id ? " view-toggle__btn--active" : ""}`}
+                  className={`Library__btn${view === v.id ? " Library__btn--active" : ""}`}
                   onClick={() => setView(v.id)}
                 >
-                  {"icon" in v && <img className="view-toggle__icon" src={v.icon} alt="" />}
+                  {"icon" in v && <img className="Library__icon" src={v.icon} alt="" />}
                   {v.label}
                 </button>
               ))}

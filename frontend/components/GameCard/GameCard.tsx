@@ -2,7 +2,7 @@
 import type { Game } from "../../interfaces/main";
 import { useState } from "react";
 import { addGameToLibrary } from "@/lib/api";
-import "./GameCard.css";
+import "./GameCard.scss";
 import { showMessage } from "../Message/Message";
 type GameStatus = "hidden" | "wishlist" | "library" | null;
 
@@ -19,7 +19,7 @@ const BADGES: { status: Exclude<GameStatus, null>; icon: string; alt: string }[]
 
 interface Props {
   game: Game;
-  isBadgesVisible: boolean;
+  isBadgesVisible?: boolean;
 }
 
 export default function GameCard({ game, isBadgesVisible = false }: Props) {
@@ -40,23 +40,23 @@ export default function GameCard({ game, isBadgesVisible = false }: Props) {
 
   return (
     <a
-      className="game-card"
+      className="GameCard"
       href={`https://store.steampowered.com/agecheck/app/${game.appid}/`}
       target="_blank"
       rel="noopener noreferrer"
     >
-      <img className="game-card__cover" src={game.header_image} alt={game.name} />
+      <img className="GameCard__cover" src={game.header_image} alt={game.name} />
       <div />
-      <div className="game-card__name-plate">
-        <span className="game-card__name-bar" />
-        <span className="game-card__name">{game.name}</span>
+      <div className="GameCard__namePlate">
+        <span className="GameCard__nameBar" />
+        <span className="GameCard__name">{game.name}</span>
       </div>
-      {game.price && <span className="game-card__price">{game.price}</span>}
+      {game.price && <span className="GameCard__price">{game.price}</span>}
       {isBadgesVisible && (
-        <div className={`game-card__badges ${isInLibrary && "game-card__badges--show"}`}>
+        <div className={`GameCard__badges ${isInLibrary && "GameCard__badges--show"}`}>
           {/* {gameStat != null && (
           <span
-            className="game-card__badge-slider"
+            className="GameCard__badgeSlider"
             style={{ "--i": BADGES.findIndex((b) => b.status === gameStat) } as React.CSSProperties}
           />
         )} */}
@@ -64,7 +64,7 @@ export default function GameCard({ game, isBadgesVisible = false }: Props) {
             <button
               key={status}
               type="button"
-              className={`game-card__badge ${isInLibrary && "game-card__badge--show"}`}
+              className={`GameCard__badge ${isInLibrary && "GameCard__badge--show"}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -72,7 +72,7 @@ export default function GameCard({ game, isBadgesVisible = false }: Props) {
                 changeGameStatus();
               }}
             >
-              <img className="game-card__badge-icon" src={icon} alt={alt} />
+              <img className="GameCard__badgeIcon" src={icon} alt={alt} />
             </button>
           ))}
         </div>
