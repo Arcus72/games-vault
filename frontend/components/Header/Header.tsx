@@ -1,10 +1,12 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import "./Header.css";
 import DynamicSearchBar from "../DynamicSearchBar/DynamicSearchBar";
-
+import { useAuth } from "@/context/AuthContext";
+import { logoutUser } from "@/lib/api";
+import { showMessage } from "../Message/Message";
+import { useRouter } from "next/navigation";
 const links = [
   { href: "/", label: "Galeria" },
   { href: "/library", label: "Moja biblioteka" },
@@ -13,6 +15,21 @@ const links = [
 
 export default function Header() {
   const pathname = usePathname();
+  const { isLogged, logout } = useAuth();
+  const router = useRouter();
+
+  const logoutHandler = () => {
+    logoutUser()
+      .then((res) => {
+        logout();
+        showMessage(res.message, "success");
+        router.replace("/");
+        router.refresh();
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+      });
+  };
 
   return (
     <header className="Header">
@@ -34,12 +51,25 @@ export default function Header() {
         ))}
       </nav>
       <DynamicSearchBar />
-      <Link className="Header__userButton" href="/register">
-        Zarejestruj się
-      </Link>
-      <Link className="Header__userButton" href="/login">
-        Zaloguj
-      </Link>
+      {isLogged() ? (
+        <>
+          <Link className="Header__userButton" href="/ustawienia">
+            Ustawienia
+          </Link>
+          <button className="Header__userButton" onClick={() => logoutHandler()}>
+            logout
+          </button>
+        </>
+      ) : (
+        <>
+          <Link className="Header__userButton" href="/register">
+            Zarejestruj się
+          </Link>
+          <Link className="Header__userButton" href="/login">
+            Zaloguj
+          </Link>
+        </>
+      )}
     </header>
   );
 }

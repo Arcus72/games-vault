@@ -4,7 +4,7 @@ import base64
 from math import ceil
 from bcrypt import hashpw, gensalt, checkpw
 from datetime import datetime, timedelta
-from fastapi import FastAPI, Depends, HTTPException, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, Body
 from sqlalchemy import null, and_
 from sqlalchemy.orm import Session
 from database.database import get_db
@@ -74,7 +74,7 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
 
     return {"message": "Użytkownik utworzony pomyślnie. Teraz możesz się zalogować.", "user_id": new_user.id}
 
-@app.put("/api/login")
+@app.post("/api/login")
 async def login(request: Request, response: Response, data: UserLogin, db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
     if session and session.user_id is not None:
         return {"message": "Użytkownik jest już zalogowany.", "user_id": session.user_id}
@@ -87,7 +87,7 @@ async def login(request: Request, response: Response, data: UserLogin, db: Sessi
     if not user:
         raise HTTPException(status_code=401, detail="Błędny mail lub hasło.")
     elif not user.active:
-        raise HTTPException(status_code=403, detail="Konto jest niekatywne.")
+        raise HTTPException(status_code=403, detail="Konto jest nieaktywne.")
     elif not checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
         raise HTTPException(status_code=401, detail="Błędny mail lub hasło.")
     
@@ -230,7 +230,7 @@ def get_languages(db: Session = Depends(get_db), session: UserSession = Depends(
 
 
 @app.post("/api/add_game_to_library")
-def add_game_to_library(app_id: int, user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+def add_game_to_library(app_id: int = Body(embed=False), user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
     user_id = user_session.user_id
     if app_id and user_id:
         library = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid == app_id).filter(UserGameLibrary.library_wishlist == 1).count()
@@ -249,9 +249,8 @@ def add_game_to_library(app_id: int, user_session: UserSession = Depends(authent
             return {"message": "Dodano do biblioteki"}
         raise HTTPException(status_code=404, detail="Błąd przetawrzania")
         
-
 @app.post("/api/add_game_to_wishlist")
-def add_game_to_library(app_id: int, user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+def add_game_to_library(app_id: int = Body(embed=False), user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
     user_id = user_session.user_id
     if app_id and user_id:
         wishlist = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid == app_id).filter(UserGameLibrary.library_wishlist == 2).first()
@@ -271,7 +270,7 @@ def add_game_to_library(app_id: int, user_session: UserSession = Depends(authent
         raise HTTPException(status_code=404, detail="Błąd przetawrzania")
 
 @app.post("/api/hide_game")
-def add_game_to_library(app_id: int, user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+def add_game_to_library(app_id: int = Body(embed=False), user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
     user_id = user_session.user_id
     if app_id and user_id:
         lib = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid == app_id).filter(UserGameLibrary.library_wishlist == 1).first()

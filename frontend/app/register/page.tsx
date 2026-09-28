@@ -1,12 +1,38 @@
 "use client";
-import { useEffect } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import "../auth.css";
+import { createUser } from "@/lib/api";
+import { CreateUserData } from "@/interfaces/api";
+import { showMessage } from "@/components/Message/Message";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const formHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.currentTarget));
+
+    const newUserData = {
+      username: data.userSteamID,
+      email: data.email,
+      password: data.password,
+      phone: "485544465",
+    } as CreateUserData;
+
+    createUser(newUserData)
+      .then((res) => {
+        showMessage(res.message, "success");
+        router.replace("/");
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+      });
+  };
+
   return (
     <main className="auth">
-      <form className="auth__form">
+      <form className="auth__form" onSubmit={(e) => formHandler(e)}>
         <h1 className="auth__title">Zarejestruj się</h1>
 
         <label className="auth__field">

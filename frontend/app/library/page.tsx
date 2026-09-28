@@ -74,7 +74,7 @@ export default function LibraryPage() {
           </div>
           <div className="grid">
             {games.map((g) => (
-              <GameCard key={g.id} game={g} stars={g.hidden} dimmed={g.hidden} />
+              <GameCard key={g.appid} game={g} />
             ))}
           </div>
           <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />

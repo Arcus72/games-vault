@@ -19,6 +19,11 @@ export interface CreateUserData {
   password: string;
 }
 
+export interface LoginData {
+  username_or_email: string;
+  password: string;
+}
+
 export interface SearchBarGame {
   appid: number;
   name: string;

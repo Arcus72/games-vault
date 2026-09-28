@@ -28,12 +28,12 @@ export type FilterSection =
     };
 
 export interface Game {
-  appid: number | string;
+  appid: number;
   name: string;
   price: number;
   header_image: string;
   isHidden: boolean | null;
-  library_wishlist: boolean | null;
+  library_wishlist: number | null;
   release_date: string | null;
   steam_url?: string;
 }

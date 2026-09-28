@@ -17,11 +17,7 @@ export default function MainPage() {
   const [filters, setFilters] = useState<FilterValues | null>(null);
 
   useEffect(() => {
-    console.log("data:", { page, filters });
-
     getGames({ page, filters }).then((res) => {
-      console.log(res);
-
       setGames(res?.games ?? []);
       setPage(res?.page ?? 1);
       setTotalPages(res?.pages ?? 1);
@@ -66,7 +62,7 @@ export default function MainPage() {
           </div>
           <div className="grid">
             {games.map((g) => (
-              <GameCard key={g.appid} game={g} />
+              <GameCard key={g.appid} game={g} isBadgesVisible={false} />
             ))}
           </div>
           <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
