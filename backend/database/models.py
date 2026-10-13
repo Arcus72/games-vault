@@ -1,5 +1,6 @@
 from sqlalchemy import Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from pgvector.sqlalchemy import Vector
 from database.database import Base
 
 class UserSession(Base):
@@ -41,6 +42,8 @@ class SteamGames(Base):
     header_image_url: Mapped[str] = mapped_column(String, index=False, nullable=False)
     capsule_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
     background_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
+
+    embedding: Mapped[list[float]] = mapped_column(Vector(1536), nullable=True)
 
     genres: Mapped[list["Genres"]] = relationship(
         secondary="tbl_SteamGenres"
@@ -134,4 +137,3 @@ class UserComments(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_Users.id"), index=True, nullable=False)
     appid: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_SteamGames.appid"), index=True, nullable=False)
     comment: Mapped[str] = mapped_column(String, index=False, nullable=False)
-
