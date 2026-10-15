@@ -14,6 +14,9 @@ from database.models import Users, UserSession, SteamGames, SteamLanguages, Stea
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, GamesRequest
 
+from graph import chatbot_app
+from langchain_core.messages import HumanMessage
+
 app = FastAPI()
 
 app.add_middleware(
@@ -24,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-#zostawiam w razie czego ale jest nie potrzebna bo każdy endpoint ma Depends(authenticate_session) ewentualnie można wrzucić przy wejściu na strone
+# zostawiam w razie czego ale jest nie potrzebna bo każdy endpoint ma Depends(authenticate_session) ewentualnie można wrzucić przy wejściu na strone
 @app.get("/api/set_user_session")
 def set_user_session(response: Response, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)):
     if not session:
@@ -284,32 +287,22 @@ def add_game_to_library(app_id: int = Body(embed=False), user_session: UserSessi
 
 
 @app.post("/api/message")
-def get_message(data: dict, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)):
+async def get_message(
+    data: dict,
+    session: UserSession = Depends(authenticate_session),
+    db: Session = Depends(get_db),
+):
     user_message = data.get("question", "")
-    print("User message:", user_message)
+
+    config = {"configurable": {"thread_id": str(session.user_id)}}
+    inputs = {"messages": [HumanMessage(content=user_message)]}
+
+    result = await chatbot_app.ainvoke(inputs, config=config)
+
+    bot_reply = result["messages"][-1].content[0]["text"]
+
     return {
         "success": True,
-        "response": "This is the list of games that will suit you best:",
-        "games": [
-            {
-            "appid": "g-9842",
-            "title": "The Witcher 3: Wild Hunt",
-            "price": 129.99,
-            "currency": "PLN",
-            "isWishList": False,
-            "imgUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1465360/header.jpg?t=1782403733",
-            "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/"
-            },
-            {
-            "appid": "g-1105",
-            "title": "Cyberpunk 2077",
-            "price": 199.9,
-            "currency": "PLN",
-            "isWishList": True,
-            "imgUrl": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1465360/header.jpg?t=1782403733",
-            "steamUrl": "https://store.steampowered.com/app/1465360/SnowRunner/"
-            }
-        ]
-        }
-        
-
+        "response": bot_reply,
+        "games": [],
+    }
