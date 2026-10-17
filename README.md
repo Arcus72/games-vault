@@ -65,7 +65,7 @@ Official repository and installation instructions: https://github.com/pgvector/p
 Connect to PostgreSQL using the configured port. The example below uses port 5433:
 
 ```bash
-psql -U postgres -p 5433 -d postgres
+psql -U postgres -p 5432 -d postgres
 ```
 
 Create the database:
@@ -79,7 +79,7 @@ CREATE DATABASE GamesVault;
 Run this command from the project root directory:
 
 ```bash
-pg_restore -U postgres -p 5433 -d GamesVault -v db/GamesVault_DB.backup
+pg_restore -U postgres -p 5432 -d gamesvault -v db/GamesVault_DB.backup
 ```
 
 Enter the PostgreSQL password when prompted.
@@ -87,7 +87,7 @@ Enter the PostgreSQL password when prompted.
 **Note:** The `pgvector` extension must be installed on the PostgreSQL server. If the restore reports that the `vector` extension is missing, enable it in the target database:
 
 ```bash
-psql -U postgres -p 5433 -d GamesVault -c "CREATE EXTENSION IF NOT EXISTS vector;"
+psql -U postgres -p 5432 -d gamesvault -c "CREATE EXTENSION IF NOT EXISTS vector;"
 ```
 
 Then retry the restore if necessary. If the backup contains existing database objects, resolve any conflicts reported by `pg_restore` before retrying.
@@ -97,13 +97,13 @@ Then retry the restore if necessary. If the backup contains existing database ob
 List the restored tables:
 
 ```bash
-psql -U postgres -p 5433 -d GamesVault -c "\dt"
+psql -U postgres -p 5432 -d gamesvault -c "\dt"
 ```
 
 Check whether `pgvector` is enabled:
 
 ```bash
-psql -U postgres -p 5433 -d GamesVault -c "SELECT extname FROM pg_extension WHERE extname = 'vector';"
+psql -U postgres -p 5432 -d gamesvault -c "SELECT extname FROM pg_extension WHERE extname = 'vector';"
 ```
 
 The database should now contain the tables and data provided by `GamesVault_DB.backup`.
