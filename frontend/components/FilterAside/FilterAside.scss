@@ -30,6 +30,38 @@
     }
   }
 
+  &__select {
+    display: block;
+    width: min(345px, calc(100% - 32px));
+    height: 40px;
+    margin: 0 auto;
+    appearance: none;
+    padding: 0 34px 0 12px;
+    background: $color-input-bg
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23efca08' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+      no-repeat right 12px center / 12px 8px;
+    border: 1px solid $color-border-input;
+    border-radius: $radius-btn;
+    color: $color-text-soft;
+    font: inherit;
+    font-size: $font-size-base;
+    cursor: pointer;
+
+    &:hover {
+      border-color: $color-border-gray;
+    }
+
+    &:focus-visible {
+      outline: none;
+      border-color: $color-yellow;
+    }
+
+    option {
+      background: $color-panel;
+      color: $color-text-soft;
+    }
+  }
+
   &__section {
     border-top: 1px solid $color-border;
     padding: 10px 0 16px;
@@ -65,6 +97,7 @@
     color: $color-border-dim;
     transform: rotate(0deg); /* closed: points right */
     transition: transform 0.2s;
+    margin-bottom: 5px;
   }
 
   &__slider {
@@ -183,7 +216,7 @@
     background: rgba(239, 202, 8, 0.33);
 
     &::after {
-      content: '✓';
+      content: "✓";
       color: $color-yellow;
       font-size: $font-size-md;
       font-weight: 500;

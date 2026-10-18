@@ -50,16 +50,6 @@ export default function MainPage() {
           <FilterAside onSave={setFilters} />
         </div>
         <section className="layout__content">
-          <div className="sort-bar">
-            sortuj według:{" "}
-            <select>
-              <option value="">Trafność</option>
-              <option value="">Data wydania</option>
-              <option value="">Nazwa</option>
-              <option value="">Najniższa cena</option>
-              <option value="">Najwyższa cena</option>
-            </select>
-          </div>
           <div className="grid">
             {games.map((g) => (
               <GameCard key={g.appid} game={g} isBadgesVisible={false} />

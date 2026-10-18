@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Markdown from "react-markdown";
 import "./chat.scss";
 import FilterAside from "@/components/FilterAside/FilterAside";
 import { FilterValues } from "../../interfaces/main";
@@ -24,6 +25,14 @@ function toGame(g: ChatGame): Game {
   };
 }
 
+/** Bot text arrives with literal "\n" sequences — turn them into real newlines.
+ *  Blank lines become an &nbsp; paragraph so the gap survives markdown collapsing. */
+function formatMarkdown(text: string): string {
+  return text
+    .replace(/\\n/g, "\n")
+    .replace(/\n{2,}/g, "\n\n&nbsp;\n\n");
+}
+
 interface Message {
   from: "user" | "bot";
   text?: string;
@@ -44,6 +53,8 @@ export default function ChatView() {
     setTyping(true);
 
     const res = await sendMessage({ filters: filterValues, question: text });
+    console.log(res);
+
     setTyping(false);
 
     if (!res?.success) {
@@ -108,7 +119,7 @@ export default function ChatView() {
                 </div>
               ) : (
                 <div key={i} className={`Chat__bubble Chat__bubble--${m.from}`}>
-                  {m.text}
+                  {m.from === "bot" ? <Markdown>{formatMarkdown(m.text ?? "")}</Markdown> : m.text}
                 </div>
               ),
             )}

@@ -1,4 +1,5 @@
-FROM postgres:17-alpine
+# Postgres 18 (backup was dumped with 18.6) with pgvector preinstalled
+FROM pgvector/pgvector:pg18
 
 # Copy the backup file to /tmp
 COPY GamesVault_DB.backup /tmp/GamesVault_DB.backup

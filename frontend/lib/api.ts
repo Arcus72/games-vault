@@ -1,9 +1,11 @@
 import type {
-  GamesRes,
+  GamesResponse,
   MessageResponse,
   CreateUserData,
-  SearchBarGame,
+  SearchBarGameResponse,
   GetGames,
+  SimpleMessage,
+  LoginData,
 } from "../interfaces/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -70,15 +72,11 @@ async function del<T>(path: string): Promise<T> {
   return data as T;
 }
 
-interface SimpleMessage {
-  message: string;
-}
+export const getUserGames = (data: GetGames): Promise<GamesResponse> =>
+  post<GamesResponse>("/api/get_steam_games", data);
 
-export const getUserGames = (data: GetGames): Promise<GamesRes> =>
-  post<GamesRes>("/api/get_steam_games", data);
-
-export const getGames = (data: GetGames): Promise<GamesRes> =>
-  post<GamesRes>("/api/get_steam_games", data);
+export const getGames = (data: GetGames): Promise<GamesResponse> =>
+  post<GamesResponse>("/api/get_steam_games", data);
 
 export const sendMessage = (data: unknown): Promise<MessageResponse> =>
   post<MessageResponse>("/api/message", data);
@@ -88,11 +86,11 @@ export const createUser = (data: CreateUserData) =>
 
 export const logoutUser = () => del<SimpleMessage>("/api/logout");
 
-export const loginUser = (data: { username_or_email: string; password: string }) =>
+export const loginUser = (data: LoginData) =>
   post<{ message: string; user_id: string }>("/api/login", data);
 
-export const getSearchResults = (filter: string): Promise<SearchBarGame[]> =>
-  get<SearchBarGame[]>(`/api/games_search_bar?${new URLSearchParams({ filter })}`);
+export const getSearchResults = (filter: string): Promise<SearchBarGameResponse[]> =>
+  get<SearchBarGameResponse[]>(`/api/games_search_bar?${new URLSearchParams({ filter })}`);
 
 export const loadAtributeListForFilter = async (
   path: string,

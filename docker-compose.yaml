@@ -28,7 +28,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DB_LINK: postgresql+psycopg2://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
+      DB_LINK: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
+      GEMINI_API: ${GEMINI_API}
     develop:
       watch:
         - path: ./backend/requirements.txt
@@ -49,7 +50,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # pg18 image keeps data in /var/lib/postgresql/18/docker; mount the parent
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d gamesvault" ]
       interval: 10s

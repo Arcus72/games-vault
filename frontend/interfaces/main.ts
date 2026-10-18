@@ -25,6 +25,13 @@ export type FilterSection =
       options: string[];
       checked?: string[];
       open?: boolean;
+    }
+  | {
+      type: "select";
+      label: string;
+      name: string;
+      options: { label: string; value: string | null }[];
+      open?: boolean;
     };
 
 export interface Game {
