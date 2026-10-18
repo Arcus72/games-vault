@@ -1,0 +1,128 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.Header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  height: $header-height;
+  padding: 0 30px 0 9px;
+  background: $color-black;
+  border-bottom: 1px solid $color-border;
+
+  &__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  &__chest {
+    width: 72px;
+    height: 72px;
+  }
+
+  &__title {
+    margin-left: 10px;
+    font-size: $font-size-3xl;
+    font-weight: 900;
+    line-height: 0.9;
+    width: 130px;
+  }
+
+  &__titleAccent {
+    color: $color-yellow;
+  }
+
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin: 0 auto;
+  }
+
+  &__link {
+    font-size: $font-size-xl;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    padding: 9px 14px;
+    border: 1px solid transparent;
+    text-shadow: 0 4px 4px rgba(0, 0, 0, 0.67);
+
+    &--active {
+      color: $color-yellow;
+      background: rgba(239, 202, 8, 0.1);
+      border-color: $color-yellow;
+      border-radius: 13px;
+    }
+  }
+
+  &__avatar {
+    display: flex;
+    width: 43px;
+    height: 43px;
+    border-radius: 50%;
+    border: 2px solid $color-text;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__avatar-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  &__userButton {
+    margin: 0 10px;
+  }
+
+  @media (max-width: 900px) {
+    height: $header-height-mobile;
+    flex-wrap: wrap;
+    align-content: center;
+    padding: 0 12px 0 6px;
+
+    &__brand {
+      margin-right: auto;
+    }
+
+    &__chest {
+      width: 40px;
+      height: 40px;
+    }
+
+    &__title {
+      font-size: $font-size-base;
+      width: auto;
+      margin-left: 6px;
+    }
+
+    &__nav {
+      order: 1;
+      flex-basis: 100%;
+      justify-content: center;
+      margin: 0;
+      gap: 6px;
+    }
+
+    &__userButton {
+      margin-left: 10px;
+      font-size: $font-size-base;
+    }
+
+    &__link {
+      font-size: $font-size-base;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+
+      &--active {
+        border-radius: 9px;
+      }
+    }
+
+    &__avatar {
+      width: 34px;
+      height: 34px;
+    }
+  }
+}

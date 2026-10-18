@@ -1,0 +1,75 @@
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import "./Header.scss";
+import DynamicSearchBar from "../DynamicSearchBar/DynamicSearchBar";
+import { useAuth } from "@/context/AuthContext";
+import { logoutUser } from "@/lib/api";
+import { showMessage } from "../Message/Message";
+import { useRouter } from "next/navigation";
+const links = [
+  { href: "/", label: "Galeria" },
+  { href: "/library", label: "Moja biblioteka" },
+  { href: "/chatbot", label: "Chat bot" },
+];
+
+export default function Header() {
+  const pathname = usePathname();
+  const { isLogged, logout } = useAuth();
+  const router = useRouter();
+
+  const logoutHandler = () => {
+    logoutUser()
+      .then((res) => {
+        logout();
+        showMessage(res.message, "success");
+        router.replace("/");
+        router.refresh();
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+      });
+  };
+
+  return (
+    <header className="Header">
+      <Link className="Header__brand" href="/">
+        <img className="Header__chest" src="/assets/chest.svg" alt="" />
+        <span className="Header__title">
+          Games <span className="Header__titleAccent">Vault</span>
+        </span>
+      </Link>
+      <nav className="Header__nav">
+        {links.map((l) => (
+          <Link
+            key={l.href}
+            href={l.href}
+            className={`Header__link${pathname === l.href ? " Header__link--active" : ""}`}
+          >
+            {l.label}
+          </Link>
+        ))}
+      </nav>
+      <DynamicSearchBar />
+      {isLogged() ? (
+        <>
+          <Link className="Header__userButton" href="/ustawienia">
+            Ustawienia
+          </Link>
+          <button className="Header__userButton" onClick={() => logoutHandler()}>
+            logout
+          </button>
+        </>
+      ) : (
+        <>
+          <Link className="Header__userButton" href="/register">
+            Zarejestruj się
+          </Link>
+          <Link className="Header__userButton" href="/login">
+            Zaloguj
+          </Link>
+        </>
+      )}
+    </header>
+  );
+}

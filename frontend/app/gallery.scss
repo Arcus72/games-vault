@@ -1,0 +1,104 @@
+@use "../styles/variables" as *;
+@use "../styles/fonts" as *;
+
+.Gallery {
+  position: relative;
+  height: 412px;
+  overflow: hidden;
+
+  &__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+  }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(53, 52, 57, 0) 0%,
+      rgba(53, 52, 57, 0.53) 22%,
+      rgba(53, 52, 57, 0.53) 50%,
+      rgba(53, 52, 57, 0) 100%
+    );
+  }
+
+  &__content {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 53px 20px 0;
+  }
+
+  &__title {
+    font-size: 50px;
+    font-weight: 900;
+    letter-spacing: -2.88px;
+    line-height: 1.1;
+    text-shadow: 0 4px 4px rgba(0, 0, 0, 0.49);
+  }
+
+  &__titleUnderline {
+    position: relative;
+    z-index: 4;
+
+    &::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      bottom: 10%;
+      left: 0;
+      width: 100%;
+      height: 12px;
+      background-color: $color-orange;
+    }
+  }
+
+  &__titleAccent {
+    color: $color-yellow;
+  }
+
+  &__text {
+    margin-top: 24px;
+    max-width: 734px;
+    font-size: $font-size-md;
+    line-height: 1.6;
+    color: #e4bfb1;
+  }
+
+  @media (max-width: 700px) {
+    height: auto;
+    min-height: 260px;
+    padding-bottom: 30px;
+
+    &__content {
+      padding: 30px 16px 0;
+    }
+
+    &__title {
+      font-size: $font-size-2xl;
+      letter-spacing: -1px;
+    }
+
+    &__titleUnderline {
+      border-bottom-width: 4px;
+    }
+  }
+}
+
+/* sibling of .Gallery in the DOM, so it can't nest inside it */
+.Gallery__strip {
+  height: 45px;
+  background-image: repeating-linear-gradient(
+    135deg,
+    #1e1e1e 0,
+    #1e1e1e 2px,
+    #141414 2px,
+    #141414 9px
+  );
+  border-bottom: 1px #1e1e1e solid;
+}

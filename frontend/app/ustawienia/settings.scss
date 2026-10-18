@@ -1,0 +1,33 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+/* /ustawienia — reuses the .auth input styles, only the boxed sections are new. */
+
+.auth.settings {
+  flex-direction: column;
+  align-items: center;
+  gap: 46px;
+
+  .settings__form {
+    width: min(420px, 100%);
+  }
+
+  .settings__box {
+    padding: 4px 22px 26px;
+    border: 1px solid $color-yellow;
+    border-radius: $radius-panel;
+  }
+
+  .settings__legend {
+    padding: 0 10px;
+    font-size: $font-size-xl;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    color: $color-text;
+  }
+
+  .settings__field {
+    display: block;
+    padding: 18px 0 0;
+  }
+}

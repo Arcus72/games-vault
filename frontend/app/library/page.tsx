@@ -1,0 +1,86 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import "./library.scss";
+import FilterAside from "../../components/FilterAside/FilterAside";
+import GameCard from "../../components/GameCard/GameCard";
+import Pagination from "../../components/Pagination/Pagination";
+import Fab from "../../components/Fab/Fab";
+import { getGames } from "../../lib/api";
+import type { Game } from "../../interfaces/main";
+
+const views = [
+  { id: "all", label: "Moje gry" },
+  {
+    id: "wishlist",
+    label: "Lista życzeń",
+    icon: "/assets/toggle-wishlist.svg",
+  },
+  { id: "hidden", label: "Ukryte", icon: "/assets/toggle-hidden.svg" },
+] as const;
+
+export default function LibraryPage() {
+  const [games, setGames] = useState<Game[]>([]);
+  const [view, setView] = useState<(typeof views)[number]["id"]>("all");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(10);
+
+  useEffect(() => {
+    getGames({
+      type: view,
+      pagination: { currentPage: page, totalPages },
+    }).then((res) => {
+      setGames(res?.games ?? []);
+      setPage(res?.page ?? 1);
+      setTotalPages(res?.pages ?? 1);
+    });
+  }, [page, view]);
+
+  return (
+    <main className="page">
+      <div className="layout layout--library">
+        <div className="layout__sidebar">
+          <section className="Library">
+            <h2 className="Library__title">Widok</h2>
+            <div className="Library__group">
+              {views.map((v) => (
+                <button
+                  key={v.id}
+                  className={`Library__btn${view === v.id ? " Library__btn--active" : ""}`}
+                  onClick={() => setView(v.id)}
+                >
+                  {"icon" in v && <img className="Library__icon" src={v.icon} alt="" />}
+                  {v.label}
+                </button>
+              ))}
+            </div>
+          </section>
+          <FilterAside
+            onSave={(filters) =>
+              getGames({ page, filters }).then((res) => setGames(res?.games ?? []))
+            }
+          />
+        </div>
+        <section className="layout__content">
+          <div className="sort-bar">
+            sortuj według:{" "}
+            <select>
+              <option value="">Trafność</option>
+              <option value="">Data wydania</option>
+              <option value="">Nazwa</option>
+              <option value="">Najniższa cena</option>
+              <option value="">Najwyższa cena</option>
+            </select>
+          </div>
+          <div className="grid">
+            {games.map((g) => (
+              <GameCard key={g.appid} game={g} />
+            ))}
+          </div>
+          <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
+        </section>
+      </div>
+      <Fab />
+    </main>
+  );
+}

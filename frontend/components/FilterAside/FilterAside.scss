@@ -1,0 +1,227 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.FilterAside {
+  padding: 26px 0 40px;
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    color: $color-text-soft;
+    margin: 0 0 20px 22px;
+  }
+
+  &__search {
+    display: block;
+    width: min(345px, calc(100% - 32px));
+    height: 40px;
+    margin: 0 auto 20px;
+    padding: 0 9px;
+    background: $color-input-bg;
+    border: 1px solid $color-border-input;
+    border-radius: 4px;
+    color: $color-text;
+    font-size: $font-size-base;
+    letter-spacing: $tracking;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+  }
+
+  &__section {
+    border-top: 1px solid $color-border;
+    padding: 10px 0 16px;
+  }
+
+  &__section[open] &__chevron {
+    transform: rotate(90deg); /* open: points down */
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px 0 11px;
+    cursor: pointer;
+    user-select: none;
+    list-style: none; /* hide the native <summary> marker */
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: $color-text-label;
+  }
+
+  &__chevron {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: $color-border-dim;
+    transform: rotate(0deg); /* closed: points right */
+    transition: transform 0.2s;
+  }
+
+  &__slider {
+    padding: 30px 23px 0;
+  }
+
+  // --filters-slider-fill is set per-instance via inline style in Slider.tsx — must stay a CSS custom prop, $vars are compile-time only
+  &__slider-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 15px;
+    background: transparent;
+    cursor: pointer;
+
+    &::-webkit-slider-runnable-track {
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(
+        to right,
+        $color-yellow var(--filters-slider-fill),
+        $color-border-dim var(--filters-slider-fill)
+      );
+    }
+
+    &::-moz-range-track {
+      height: 3px;
+      border-radius: 2px;
+      background: $color-border-dim;
+    }
+
+    &::-moz-range-progress {
+      height: 3px;
+      border-radius: 2px;
+      background: $color-yellow;
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      margin-top: -6px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: $color-yellow;
+      box-shadow: 0 0 10px rgba(239, 202, 8, 0.8);
+    }
+
+    &::-moz-range-thumb {
+      border: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: $color-yellow;
+      box-shadow: 0 0 10px rgba(239, 202, 8, 0.8);
+    }
+  }
+
+  &__slider-value {
+    margin: 14px 0 0 0;
+    font-size: $font-size-lg;
+    font-weight: 500;
+  }
+
+  &__year {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+    padding-top: 22px;
+  }
+
+  &__year-input {
+    width: 103px;
+    height: 38px;
+    background: rgba(92, 92, 92, 0.32);
+    border: 1px solid $color-yellow;
+    border-radius: $radius-btn;
+    color: $color-text-muted;
+    font-size: $font-size-lg;
+    font-weight: 500;
+    text-align: center;
+
+    &::placeholder {
+      color: $color-text-muted;
+    }
+  }
+
+  &__year-dash {
+    width: 34px;
+    height: 2px;
+    background: $color-border-dim;
+  }
+
+  &__tags {
+    display: flex;
+    flex-direction: column;
+    gap: 17px;
+    padding: 20px 0 0 22px;
+  }
+
+  &__tag {
+    display: flex;
+    align-items: center;
+    gap: 17px;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    font-weight: 500;
+  }
+
+  &__tag-input {
+    display: none;
+  }
+
+  &__tag-input:checked + &__tag-box {
+    background: rgba(239, 202, 8, 0.33);
+
+    &::after {
+      content: '✓';
+      color: $color-yellow;
+      font-size: $font-size-md;
+      font-weight: 500;
+    }
+  }
+
+  &__tag-box {
+    width: 22px;
+    height: 22px;
+    border: 1px solid $color-yellow;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 14px;
+    padding: 20px 15px 0;
+  }
+
+  &__btn {
+    flex: 1;
+    height: 46px;
+    border-radius: $radius-btn;
+    font-size: $font-size-xl;
+    font-weight: 500;
+    color: $color-text;
+
+    &--save {
+      background: $grad-brand;
+      text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+    }
+
+    &--reset {
+      background: rgba(92, 92, 92, 0.32);
+      border: 2px solid $color-border-gray;
+    }
+  }
+}

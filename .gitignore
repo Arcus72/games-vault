@@ -1,0 +1,16 @@
+.venv
+venv
+alembic
+.env
+__pycache__/
+*.pyc
+.git
+*.md
+node_modules
+.next
+.env
+.git
+*.md
+TODO.txt
+todo.txt
+alembic.ini

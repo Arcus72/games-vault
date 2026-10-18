@@ -1,0 +1,78 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.DynamicSearchBar {
+  height: 50%;
+  position: relative;
+  &__button {
+    background-color: #333333;
+    height: 100%;
+    padding: 5px;
+    border-radius: 10px;
+  }
+
+  &__searchSVG {
+    height: 100%;
+  }
+
+  &__inputSection {
+    display: none;
+    position: absolute;
+    right: 0;
+
+    input {
+      display: block;
+      width: 30ch;
+      height: 40px;
+      padding: 0 9px;
+      background: $color-input-bg;
+      border: 1px solid $color-border-input;
+      border-radius: 4px;
+      color: $color-text;
+      font-size: $font-size-base;
+      letter-spacing: $tracking;
+
+      &::placeholder {
+        color: $color-text-muted;
+      }
+
+      &:focus {
+        outline: none;
+        border-color: $color-yellow;
+      }
+    }
+  }
+
+  &:focus-within &__inputSection {
+    display: block;
+  }
+
+  &__games {
+    position: absolute;
+
+    right: 0;
+  }
+
+  &__game {
+    margin-top: 2px;
+    background-color: $color-input-bg;
+    display: flex;
+  }
+
+  &__gameName {
+    padding: 5px 20px 5px 10px;
+    text-wrap: nowrap;
+  }
+
+  &__errorMessage {
+    position: absolute;
+    background-color: $color-input-bg;
+    right: 0;
+    padding-top: 10px;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+
+    color: $color-text;
+  }
+}
