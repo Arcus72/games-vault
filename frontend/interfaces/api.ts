@@ -6,7 +6,7 @@ export interface MessageResponse {
   games: ChatGame[];
 }
 
-export interface GamesRes {
+export interface GamesResponse {
   games: Game[];
   page: number;
   pages: number;
@@ -24,7 +24,7 @@ export interface LoginData {
   password: string;
 }
 
-export interface SearchBarGame {
+export interface SearchBarGameResponse {
   appid: number;
   name: string;
   capsule_image: string;
@@ -33,4 +33,8 @@ export interface SearchBarGame {
 export interface GetGames {
   page: number;
   filters: FilterValues | null;
+}
+
+export interface SimpleMessage {
+  message: string;
 }

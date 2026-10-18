@@ -18,6 +18,19 @@ async function getConfig(): Promise<FilterSection[]> {
   return [
     { type: "search", name: "name" },
     {
+      type: "select",
+      label: "Sortuj według",
+      name: "sort_by",
+      options: [
+        { label: "Trafność", value: null },
+        { label: "Data wydania", value: "release_date" },
+        { label: "Nazwa", value: "name" },
+        { label: "Najniższa cena", value: "price_asc" },
+        { label: "Najwyższa cena", value: "price_desc" },
+      ],
+      open: true,
+    },
+    {
       type: "slider",
       label: "zakres cen",
       name: "price_max",
@@ -71,7 +84,7 @@ async function getConfig(): Promise<FilterSection[]> {
 function initialValues(filterConfig: FilterSection[]): FilterValues {
   const values: FilterValues = {};
   filterConfig.forEach((s) => {
-    if (s.type === "search") values[s.name] = null;
+    if (s.type === "search" || s.type === "select") values[s.name] = null;
     else if (s.type === "slider") values[s.name] = s.value;
     else if (s.type === "range") {
       values[s.startName] = null;

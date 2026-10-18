@@ -69,49 +69,6 @@ a {
   }
 }
 
-.sort-bar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: $font-size-sm;
-  font-weight: 700;
-  letter-spacing: $tracking;
-  text-transform: uppercase;
-  color: $color-text-label;
-
-  select {
-    appearance: none;
-    height: 40px;
-    padding: 0 34px 0 12px;
-    background: $color-input-bg
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23efca08' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
-      no-repeat right 12px center / 12px 8px;
-    border: 1px solid $color-border-input;
-    border-radius: $radius-btn;
-    color: $color-text-soft;
-    font: inherit;
-    font-size: $font-size-base;
-    text-transform: none;
-    cursor: pointer;
-
-    &:hover {
-      border-color: $color-border-gray;
-    }
-
-    &:focus-visible {
-      outline: none;
-      border-color: $color-yellow;
-    }
-
-    option {
-      background: $color-panel;
-      color: $color-text-soft;
-    }
-  }
-}
-
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr));

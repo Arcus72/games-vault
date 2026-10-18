@@ -177,7 +177,7 @@
   }
 
   &__bubble {
-    max-width: 560px;
+    max-width: 800px;
     padding: 14px 24px;
     font-size: $font-size-lg;
     font-weight: 500;
@@ -193,9 +193,11 @@
 
     &--bot {
       align-self: flex-start;
-      background: none;
-      padding-left: 0;
+      padding-left: 30px;
       color: $color-text;
+      background: #000;
+
+      border-radius: 0 $radius-panel $radius-panel $radius-panel;
     }
 
     &--typing {

@@ -2,10 +2,10 @@
 import "./DynamicSearchBar.scss";
 import { getSearchResults } from "@/lib/api";
 import { useRef, useState } from "react";
-import { SearchBarGame } from "@/interfaces/api";
+import { SearchBarGameResponse } from "@/interfaces/api";
 
 function DynamicSearchBar() {
-  const [games, setGames] = useState<SearchBarGame[]>([]);
+  const [games, setGames] = useState<SearchBarGameResponse[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 

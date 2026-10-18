@@ -49,6 +49,20 @@ export default function Section({
         <Slider section={s} value={values[s.name] as number | null} set={set} />
       )}
 
+      {s.type === "select" && (
+        <select
+          className="FilterAside__select"
+          value={(values[s.name] as string) ?? ""}
+          onChange={(e) => set(s.name, e.target.value || null)}
+        >
+          {s.options.map((o) => (
+            <option key={o.label} value={o.value ?? ""}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      )}
+
       {s.type === "range" && (
         <div className="FilterAside__year">
           <input
