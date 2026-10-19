@@ -13,6 +13,7 @@ class AgentState(TypedDict):
     filters: GameFilter | None
 
     results: list[dict[str, Any]]
+    games: list[dict[str, Any]]
 
 
 class IntentClassifier(BaseModel):

@@ -22,11 +22,9 @@ def semantic_search_node(state: AgentState) -> AgentState:
             .all()
         )
 
-        results = [{"id": game.appid, "name": game.name} for game in matched_games]
+        results = [game.appid for game in matched_games]
         for matched_game in matched_games:
-            print(
-                f"🎯 Znaleziono w bazie: {matched_game.name} (appid: {matched_game.appid})"
-            )
+            print(f"🎯 Znaleziono w bazie: {matched_game.name} (appid: {matched_game.appid})")
 
         return {"results": results}
 

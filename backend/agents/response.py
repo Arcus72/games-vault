@@ -26,192 +26,125 @@ CRITICAL RULE:
 
 def response_node(state: AgentState) -> dict:
     print("response agent")
+    intent = state.get("message_intent")
+    results = state.get("results", [])
+
+    # Jeśli brak wyników dla wyszukiwania i rekomendacji
+    if intent in ("semantic_search", "recommendation") and not results:
+        msg = (
+            "Niestety nie znalazłem żadnych gier pasujących do Twojego zapytania."
+            if intent == "semantic_search"
+            else "Niestety nie znalazłem żadnych rekomendacji gier dopasowanych do Twojego profilu i filtrów."
+        )
+        return {"messages": [AIMessage(content=msg)]}
 
     db = next(get_db())
+    try:
 
-    # INFO AGENT RESPONSE
-    if state.get("message_intent") == "game_info":
-
-        game = (
-            db.query(SteamGames.short_description, SteamGames.about_the_game, SteamGames.publisher, SteamGames.release_date, SteamGames.price, SteamGames.pc_requirements)
-            .filter(SteamGames.appid == state.get("results")[0]["id"])
-            .first()
+        # Pobranie danych z bazy
+        matched_games = (
+            db.query(
+                SteamGames.appid,
+                SteamGames.name,
+                SteamGames.short_description,
+                SteamGames.about_the_game,
+                SteamGames.publisher,
+                SteamGames.price,
+                SteamGames.release_date,
+                SteamGames.pc_requirements,
+                SteamGames.header_image_url,
+                SteamGames.background_image_url,
+            )
+            .filter(SteamGames.appid.in_(results))
+            .all()
         )
 
-        context_str = f"""
-            Tytuł/Opis: {game.short_description}
-            Wydawca: {game.publisher}
-            Data premiery: {game.release_date}
-            Cena: {game.price}
-            Wymagania PC: {game.pc_requirements}
-            O grze: {game.about_the_game}
-        """
+        if not matched_games:
+            return {
+                "messages": [
+                    AIMessage(
+                        content="Nie znaleziono szczegółów dotyczących wybranych gier."
+                    )
+                ]
+            }
 
+        # Budowanie kontekstu dla LLM zależnie od intencji
+        if intent == "game_info":
+            game = matched_games[0]
+            context_str = (
+                f"Tytuł/Opis: {game.short_description}\n"
+                f"Wydawca: {game.publisher}\n"
+                f"Data premiery: {game.release_date}\n"
+                f"Cena: {game.price}\n"
+                f"Wymagania PC: {game.pc_requirements}\n"
+                f"O grze: {game.about_the_game}"
+            )
+            instructions = "Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych:"
+
+        elif intent == "semantic_search":
+            context_str = "\n".join(
+                [
+                    f"--- GAME ---\nTytuł: {g.name}\nWydawca: {g.publisher}\n"
+                    f"Data premiery: {g.release_date}\nCena: {g.price}\nOpis: {g.short_description}\n"
+                    for g in matched_games
+                ]
+            )
+            instructions = (
+                "Na podstawie poniższych informacji z bazy danych przedstaw użytkownikowi wszystkie "
+                "podane gry i krótko wyjaśnij, dlaczego do niego pasują.\n"
+                "Odpowiadaj WYŁĄCZNIE na podstawie poniższego kontekstu:"
+            )
+
+        elif intent == "recommendation":
+            context_str = "\n".join(
+                [
+                    f"--- DEDYKOWANA REKOMENDACJA ---\nTytuł: {g.name}\nWydawca: {g.publisher}\n"
+                    f"Data premiery: {g.release_date}\nCena: {g.price}\nOpis: {g.short_description}\n"
+                    for g in matched_games
+                ]
+            )
+            instructions = (
+                "Na podstawie analizy preferencji oraz biblioteki użytkownika dobrano dla niego poniższe propozycje gier.\n"
+                "Przedstaw te rekomendacje w atrakcyjny sposób, wyjaśniając, dlaczego te pozycje są warte uwagi.\n"
+                "Odpowiadaj WYŁĄCZNIE na podstawie poniższego kontekstu z bazy danych:"
+            )
+        else:
+            return {"messages": [AIMessage(content="Nieznana intencja wiadomości.")]}
+
+        # Generowanie odpowiedzi przez LLM
         system_prompt = SystemMessage(
-            content=f"Jesteś pomocnym asystentem gier wideo. Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych:\n\nKONTEKST:\n{context_str}"
+            content=f"Jesteś ekspertowym doradcą i asystentem gier wideo. {instructions}\n\nKONTEKST:\n{context_str}"
         )
+        messages = [system_prompt, HumanMessage(content=state["messages"][-1].content)]
 
-        messages = [
-            SystemMessage(content=system_prompt.content),
-            HumanMessage(content=state["messages"][-1].content)
-        ]
+        response = get_llm_model().invoke(messages)
 
-        model = get_llm_model()
-        response = model.invoke(messages)
+        # Wyciągnięcie tekstu do printa/debugowania
+        content_text = (
+            response.content[0]["text"]
+            if isinstance(response.content, list)
+            else response.content
+        )
 
         print("\n\nRESPONSE AGENT OUTPUT:\n")
-        print(response.content[0]["text"])
+        print(content_text)
         print("\n--------------------\n")
+
         return {
             "messages": [AIMessage(content=response.content)],
-            "active_game": state.get("results")[0]["name"],
+            "games": [
+                {
+                    "id": g.appid,
+                    "title": g.name,
+                    "price": g.price,
+                    "currency": "PLN",
+                    "isWishList": False,
+                    "imgUrl": g.header_image_url,
+                    "steamUrl": g.background_image_url,
+                }
+                for g in matched_games
+            ],
         }
 
-    # SEMANTIC SEARCH RESPONSE
-    if state.get("message_intent") == "semantic_search":
-
-        results = state.get("results", [])
-
-        if not results:
-            return {
-                "messages": [
-                    AIMessage(
-                        content="Niestety nie znalazłem żadnych gier pasujących do Twojego zapytania."
-                    )
-                ]
-            }
-
-        # Pobieramy ID wszystkich znalezionych gier z wyników wyszukiwania semantycznego
-        appids = [game["id"] for game in results]
-
-        # Pobieramy szczegółowe informacje z bazy danych dla znalezionych gier
-        matched_games = (
-            db.query(
-                SteamGames.appid,
-                SteamGames.name,
-                SteamGames.short_description,
-                SteamGames.publisher,
-                SteamGames.price,
-                SteamGames.release_date,
-            )
-            .filter(SteamGames.appid.in_(appids))
-            .all()
-        )
-
-        # Budujemy wzbogacony kontekst dla każdego zebranego rekordu (RAG)
-        context_blocks = []
-        for g in matched_games:
-            block = (
-                f"--- GAME --- \n"
-                f"Tytuł: {g.name}\n"
-                f"Wydawca: {g.publisher}\n"
-                f"Data premiery: {g.release_date}\n"
-                f"Cena: {g.price}\n"
-                f"Opis: {g.short_description}\n"
-            )
-            context_blocks.append(block)
-
-        context_str = "\n".join(context_blocks)
-
-        # Promp systemu nakazujący odpowiadanie WYŁĄCZNIE na podstawie zebranego kontekstu
-        system_prompt = SystemMessage(
-            content=(
-                "Jesteś pomocnym asystentem gier wideo. Na podstawie poniższych informacji z bazy danych "
-                "przedstaw użytkownikowi wszystkie podane gry i krótko wyjaśnij, dlaczego do niego pasują.\n"
-                "Odpowiadaj WYŁĄCZNIE na podstawie poniższego kontekstu:\n\n"
-                f"KONTEKST:\n{context_str}"
-            )
-        )
-
-        messages = [system_prompt, HumanMessage(content=state["messages"][-1].content)]
-
-        model = get_llm_model()
-        response = model.invoke(messages)
-
-        # Wyciągnięcie tekstu z odpowiedzi (dostosowane do struktury LangChain / Anthropic / OpenAI)
-        content_text = (
-            response.content[0]["text"]
-            if isinstance(response.content, list)
-            else response.content
-        )
-
-        print("\n\nRESPONSE AGENT OUTPUT:\n")
-        print(content_text)
-        print("\n--------------------\n")
-
-        return {"messages": [AIMessage(content=response.content)]}
-
-    # RECOMMENDATION AGENT RESPONSE
-    if state.get("message_intent") == "recommendation":
-
-        results = state.get("results", [])
-
-        if not results:
-            return {
-                "messages": [
-                    AIMessage(
-                        content="Niestety nie znalazłem żadnych rekomendacji gier dopasowanych do Twojego profilu i filtrow."
-                    )
-                ]
-            }
-
-        # Pobieramy ID wszystkich poleconych gier
-        appids = [game["id"] for game in results]
-
-        # Pobieramy szczegółowe informacje z bazy danych dla znalezionych gier
-        matched_games = (
-            db.query(
-                SteamGames.appid,
-                SteamGames.name,
-                SteamGames.short_description,
-                SteamGames.publisher,
-                SteamGames.price,
-                SteamGames.release_date,
-            )
-            .filter(SteamGames.appid.in_(appids))
-            .all()
-        )
-
-        # Budujemy wzbogacony kontekst RAG
-        context_blocks = []
-        for g in matched_games:
-            block = (
-                f"--- DEDYKOWANA REKOMENDACJA --- \n"
-                f"Tytuł: {g.name}\n"
-                f"Wydawca: {g.publisher}\n"
-                f"Data premiery: {g.release_date}\n"
-                f"Cena: {g.price}\n"
-                f"Opis: {g.short_description}\n"
-            )
-            context_blocks.append(block)
-
-        context_str = "\n".join(context_blocks)
-
-        system_prompt = SystemMessage(
-            content=(
-                "Jesteś ekspertowym doradcą i asystentem gier wideo. Na podstawie analizy preferencji oraz "
-                "biblioteki użytkownika dobrano dla niego poniższe propozycje gier.\n"
-                "Przedstaw te rekomendacje w atrakcyjny sposób, wyjaśniając, dlaczego te pozycje są warte uwagi.\n"
-                "Odpowiadaj WYŁĄCZNIE na podstawie ponizszego kontekstu z bazy danych:\n\n"
-                f"KONTEKST REKOMENDACJI:\n{context_str}"
-            )
-        )
-
-        messages = [system_prompt, HumanMessage(content=state["messages"][-1].content)]
-
-        model = get_llm_model()
-        response = model.invoke(messages)
-
-        # Bezpieczne wyciągnięcie tekstu z odpowiedzi
-        content_text = (
-            response.content[0]["text"]
-            if isinstance(response.content, list)
-            else response.content
-        )
-
-        print("\n\nRESPONSE AGENT OUTPUT:\n")
-        print(content_text)
-        print("\n--------------------\n")
-
-        # Zwracamy AIMessage ze spreparowanym tekstem content_text
-        return {"messages": [AIMessage(content=response.content)]}
+    finally:
+        db.close()

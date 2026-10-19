@@ -364,9 +364,10 @@ async def get_message(
     result = await chatbot_app.ainvoke(inputs, config=config)
 
     bot_reply = result["messages"][-1].content[0]["text"]
+    games = result.get("games", [])
 
     return {
         "success": True,
         "response": bot_reply,
-        "games": [],
+        "games": games,
     }

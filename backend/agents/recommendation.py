@@ -3,6 +3,7 @@ from typing import Any
 from database.database import get_db
 from database.models import SteamGames
 import numpy as np
+from model_loader import get_embedding_model
 
 
 def recommendation_node(state: AgentState) -> AgentState:
@@ -28,16 +29,13 @@ def recommendation_node(state: AgentState) -> AgentState:
         )
 
         # Wyciągnięcie embeddingów
-        embeddings = [g.embedding for g in library_games]
-
-        if not embeddings:
-            print("⚠️ Brak embeddingów dla gier z biblioteki użytkownika.")
-            state["recommendations"] = []
-            return state
+        embeddings = [g.embedding for g in library_games if g.embedding is not None]
 
         # Obliczenie średniego embeddingu (profilu użytkownika)
-        embeddings_matrix = np.array(embeddings)
-        user_profile = np.mean(embeddings_matrix, axis=0)
+        if embeddings:
+            user_profile = np.mean(np.array(embeddings), axis=0)
+        else:
+            user_profile = None
 
         # Normalizacja profilu użytkownika
         norm = np.linalg.norm(user_profile)
@@ -69,19 +67,13 @@ def recommendation_node(state: AgentState) -> AgentState:
         )
 
         # Formatowanie wyników
-        results = []
-        for appid, name in matched_games:
-            print(f"🎯 Znaleziono w bazie: {name} (appid: {appid})")
-            results.append({"id": appid, "name": name})
+        results = [game.appid for game in matched_games]
+        for matched_game in matched_games:
+            print(f"🎯 Znaleziono w bazie: {matched_game.name} (appid: {matched_game.appid})")
 
         return {"results": results}
 
-
-        # USER BASED FILTERING - rekomendacje na podstawie biblioteki użytkownika
-
-
-
-
+        # COLLABORATIVE FILTERING
 
     except Exception as e:
         print(f"❌ Błąd podczas filtrowania: {e}")

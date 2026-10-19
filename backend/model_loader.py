@@ -22,6 +22,7 @@ def get_embedding_model(settings: Settings = get_settings()) -> SentenceTransfor
 
     return model
 
+_ = get_embedding_model()  # Ładowanie do pamięci model embeddingów
 
 def get_embedding(text: str) -> list[float]:
     """Generuje wektor embeddingów z podanego tekstu."""
