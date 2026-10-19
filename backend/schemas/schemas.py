@@ -14,6 +14,10 @@ class UserPasswordChange(BaseModel):
     old_password: str
     new_password: str
 
+class Sorting(BaseModel):
+    sort_by: str | None = None  
+    ascending: int | None = None
+
 class GameFilter(BaseModel):
     page: int = 1
     name: str | None = None
@@ -25,8 +29,8 @@ class GameFilter(BaseModel):
     IsReleased: bool | None = None
     release_date_min_year: int | None = None
     release_date_max_year: int | None = None
-    sort_by: str | None = None  
-    ascending: int | None = None
+    sorting: Sorting | None = None
+
 
 class UserLibraryFilters(GameFilter):
     status: int | None = None              # 0 -> Brak 1 -> Wishlist 2 -> Library 3 -> Library_Hidden
@@ -43,6 +47,7 @@ class GameRespone(BaseModel):
     release_date: str | None
     header_image: str
     status: int | None   # 0 -> Brak 1 -> Wishlist 2 -> Library 3 -> Library_Hidden
+    FromSteam: int | None
 
     model_config = ConfigDict(from_attributes=True)
 

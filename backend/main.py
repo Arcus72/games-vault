@@ -162,6 +162,7 @@ def get_steam_games(filters: GameFilter, session: UserSession = Depends(authenti
                     release_date=game.release_date,
                     header_image=game.header_image_url,
                     status=lib.status if lib else 0,
+                    FromSteam=lib.FromSteam if lib else 0
                 )
                 for game, lib in games
             ]
@@ -174,6 +175,7 @@ def get_steam_games(filters: GameFilter, session: UserSession = Depends(authenti
                 release_date=game.release_date,
                 header_image=game.header_image_url,
                 status=0,
+                FromSteam=0
             )
             for game in games
         ]
@@ -204,6 +206,7 @@ def get_user_library(filters: UserLibraryFilters, db: Session = Depends(get_db),
             release_date=game.release_date,
             header_image=game.header_image_url,
             status=lib.status,
+            FromSteam=lib.FromSteam
         ) for game, lib in user_library
     ]
 
@@ -274,24 +277,39 @@ def toggle_library_game(app_id: int = Body(embed=False), user_session: UserSessi
             return {"status": 2, "message": "Dodano do biblioteki"}
         raise HTTPException(status_code=404, detail="Błąd przetawrzania")
 
-# @app.post("/api/add_games_from_steam")
-# def add_games_from_steam(user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
-#     user_id = user_session.user_id
-#     if user_id:
-#         user = db.query(Users).filter(Users.id == user_id).first()
-#         if not user or not user.steam_id:
-#             raise HTTPException(status_code=404, detail="Nie znaleziono użytkownika lub brak Steam ID.")
+@app.post("/api/add_games_from_steam")
+def add_games_from_steam(user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+    user_id = user_session.user_id
+    if user_id:
+        user = db.query(Users).filter(Users.id == user_id).first()
+        if not user or not user.steam_id:
+            raise HTTPException(status_code=404, detail="Nie znaleziono użytkownika lub brak Steam ID.")
         
-#         steam_id64 = GET_STEAM64(user.steam_id)
-#         games_list = get_steam_library_games_list(steam_id64)
+        steam_id64 = GET_STEAM64(user.steam_id)
+        games_list = get_steam_library_games_list(steam_id64)
 
-#         query = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(games_list)).all()
+        query = db.query(SteamGames).filter(SteamGames.appid.in_(games_list)).all()
+        GamesID = [game.appid for game in query]
 
-#         query_to_update = query.filter(UserGameLibrary.FromSteam == 0)
+        query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 0).all()
+        GamesID_Update = [game.appid for game in query_update]
 
-        
-#         return {"message": steam_id64, "lista_gier": games_list}
-#     raise HTTPException(status_code=404, detail="Błąd przetwarzania.")
+        db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID_Update)).update({"FromSteam": 1})
+        db.commit()
+
+        GamesID_Insert = list(set(GamesID) - set(GamesID_Update))
+
+        objects_to_insert = [
+            UserGameLibrary(
+                user_id=user_id, appid=appid, status=2, FromSteam=1
+            ) for appid in GamesID_Insert
+        ]
+
+        db.bulk_save_objects(objects_to_insert)
+        db.commit()
+
+        return {"status": "success", "message": "Gry z biblioteki Steam zostały dodane do Twojej biblioteki."}
+    raise HTTPException(status_code=404, detail="Błąd przetwarzania.")
 
 @app.post("/api/toggle_wishlist_game")
 def toggle_wishlist_game(app_id: int = Body(embed=False), user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):

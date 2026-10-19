@@ -32,12 +32,13 @@ def get_filtered_steam_games(db: Session, filters: GameFilter):
         query = query.join(SteamGames.languages).filter(Languages.language.in_(filters.languages))
     if filters.tags is not None:
         query = query.join(SteamGames.tags).filter(Tags.tag.in_(filters.tags))
-    if filters.sort_by is not None and filters.sort_by in SteamGames.__table__.columns.keys():
-        sort_column = getattr(SteamGames, filters.sort_by)
-        if filters.ascending == 1:
-            query = query.order_by(nulls_last(sort_column.asc()))
-        else:
-            query = query.order_by(nulls_last(sort_column.desc())) 
+    if filters.sorting is not None:
+        if filters.sorting.sort_by is not None and filters.sorting.sort_by in SteamGames.__table__.columns.keys():
+            sort_column = getattr(SteamGames, filters.sorting.sort_by)
+            if filters.sorting.ascending == 1:
+                query = query.order_by(nulls_last(sort_column.asc()))
+            else:
+                query = query.order_by(nulls_last(sort_column.desc()))
     return query.distinct()
 
 def get_searched_games(db: Session, search_query: str):
