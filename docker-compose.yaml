@@ -1,7 +1,8 @@
 services:
   web:
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     build: ./frontend
     ports:
       - "3000:3000"
@@ -30,6 +31,17 @@ services:
     environment:
       DB_LINK: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
       GEMINI_API: ${GEMINI_API}
+      STEAM_API_KEY: ${STEAM_API_KEY}
+      MODEL_NAME: ${MODEL_NAME:-BAAI/bge-m3}
+      # optional; empty = anonymous HF Hub access (just a warning + lower rate limits)
+      HF_TOKEN: ${HF_TOKEN:-}
+    healthcheck:
+      # python:slim has no curl; /docs answers only after the embedding model is loaded
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)" ]
+      interval: 10s
+      retries: 3
+      # a fresh container downloads the ~2.3 GB model
+      start_period: 15m
     develop:
       watch:
         - path: ./backend/requirements.txt

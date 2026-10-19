@@ -137,6 +137,8 @@ def add_steam_id(steam_id: str, user_session: UserSession = Depends(authenticate
 
 @app.post("/api/get_steam_games", response_model=GamesFilterRespone)
 def get_steam_games(filters: GameFilter, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)) -> GamesFilterRespone:
+    print(filters)
+
     page = filters.page
     if not page or page < 1:
         page = 1

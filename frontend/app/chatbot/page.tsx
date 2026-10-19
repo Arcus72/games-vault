@@ -11,26 +11,18 @@ import type { ChatGame, Game } from "../../interfaces/main";
 
 const SUGGESTIONS = Array(4).fill("Znajdź nową grę na podstawie mojej biblioteki");
 
-/** /api/message returns a different game shape than the grid — adapt it for GameCard. */
-function toGame(g: ChatGame): Game {
+function toGame(g: ChatGame) {
   return {
     appid: g.appid,
     name: g.title,
     price: g.price,
     header_image: g.imgUrl,
-    steam_url: g.steamUrl,
-    library_wishlist: null,
-    release_date: null,
-    isHidden: false,
+    status: g.status || 0,
   };
 }
 
-/** Bot text arrives with literal "\n" sequences — turn them into real newlines.
- *  Blank lines become an &nbsp; paragraph so the gap survives markdown collapsing. */
 function formatMarkdown(text: string): string {
-  return text
-    .replace(/\\n/g, "\n")
-    .replace(/\n{2,}/g, "\n\n&nbsp;\n\n");
+  return text.replace(/\\n/g, "\n").replace(/\n{2,}/g, "\n\n&nbsp;\n\n");
 }
 
 interface Message {

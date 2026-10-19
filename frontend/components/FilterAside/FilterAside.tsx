@@ -20,13 +20,13 @@ async function getConfig(): Promise<FilterSection[]> {
     {
       type: "select",
       label: "Sortuj według",
-      name: "sort_by",
+      name: "sorting",
       options: [
-        { label: "Trafność", value: null },
-        { label: "Data wydania", value: "release_date" },
-        { label: "Nazwa", value: "name" },
-        { label: "Najniższa cena", value: "price_asc" },
-        { label: "Najwyższa cena", value: "price_desc" },
+        { label: "Trafność", value: { sort_by: "recommendations", ascending: 0 } },
+        { label: "Data wydania", value: { sort_by: "release_date", ascending: 1 } },
+        { label: "Nazwa", value: { sort_by: "name", ascending: 1 } },
+        { label: "Najniższa cena", value: { sort_by: "price", ascending: 1 } },
+        { label: "Najwyższa cena", value: { sort_by: "price", ascending: 0 } },
       ],
       open: true,
     },
@@ -37,10 +37,10 @@ async function getConfig(): Promise<FilterSection[]> {
       value: null,
       steps: [
         { label: "Za darmo", value: 0 },
-        { label: "poniżej 5$", value: 5 },
-        { label: "poniżej 10$", value: 10 },
-        { label: "poniżej 20$", value: 20 },
+        { label: "poniżej 20zł", value: 20 },
         { label: "poniżej 50$", value: 50 },
+        { label: "poniżej 100$", value: 100 },
+        { label: "poniżej 200$", value: 200 },
         { label: "Bez limitu", value: null },
       ],
       open: true,
@@ -126,7 +126,10 @@ export default function FilterAside({
         <Section key={s.name} section={s} values={values} set={set} />
       ))}
       <div className="FilterAside__buttons">
-        <button className="FilterAside__btn FilterAside__btn--save" onClick={() => onSave?.(values)}>
+        <button
+          className="FilterAside__btn FilterAside__btn--save"
+          onClick={() => onSave?.(values)}
+        >
           Zapisz
         </button>
         <button

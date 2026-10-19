@@ -16,7 +16,7 @@ export default function LoginPage() {
     const data = Object.fromEntries(new FormData(e.currentTarget));
 
     const newUserData = {
-      username_or_email: data.email,
+      username_or_email: data.email_login,
       password: data.password,
     } as LoginData;
 
@@ -37,13 +37,13 @@ export default function LoginPage() {
         <h1 className="auth__title">Zaloguj</h1>
 
         <label className="auth__field">
-          <span className="auth__label">E-mail</span>
+          <span className="auth__label">E-mail lub login</span>
           <input
             className="auth__input"
-            type="email"
-            name="email"
+            type="email_login"
+            name="email_login"
             placeholder="you@example.com"
-            autoComplete="email"
+            autoComplete="email_login"
             required
           />
         </label>

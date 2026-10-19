@@ -10,6 +10,8 @@ import { getGames } from "../lib/api";
 import type { Game } from "../interfaces/main";
 import { FilterValues } from "../interfaces/main";
 
+import { showMessage } from "@/components/Message/Message";
+
 export default function MainPage() {
   const [games, setGames] = useState<Game[]>([]);
   const [page, setPage] = useState(1);
@@ -17,11 +19,20 @@ export default function MainPage() {
   const [filters, setFilters] = useState<FilterValues | null>(null);
 
   useEffect(() => {
-    getGames({ page, filters }).then((res) => {
-      setGames(res?.games ?? []);
-      setPage(res?.page ?? 1);
-      setTotalPages(res?.pages ?? 1);
-    });
+    const filterData = { page: page, ...filters };
+
+    getGames(filterData)
+      .then((res) => {
+        setGames(res?.games ?? []);
+        setPage(res?.page ?? 1);
+        setTotalPages(res?.pages ?? 1);
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+        setGames([]);
+        setPage(1);
+        setTotalPages(1);
+      });
   }, [page, filters]);
 
   return (
@@ -44,21 +55,24 @@ export default function MainPage() {
         </div>
       </section>
       <div className="Gallery__strip" />
-
       <div className="layout">
         <div className="layout__sidebar">
           <FilterAside onSave={setFilters} />
         </div>
         <section className="layout__content">
-          <div className="grid">
-            {games.map((g) => (
-              <GameCard key={g.appid} game={g} isBadgesVisible={false} />
-            ))}
-          </div>
+          {games.length == 0 ? (
+            <div className="Gallery__noGameFound">Nie znaleziono gier</div>
+          ) : (
+            <div className="grid">
+              {games.map((g) => (
+                <GameCard key={g.appid} game={g} isBadgesVisible={true} />
+              ))}
+            </div>
+          )}
           <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
         </section>
       </div>
-      <Fab />
+      {/* <Fab /> */}
     </main>
   );
 }

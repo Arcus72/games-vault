@@ -1,5 +1,7 @@
 # Games Vault
 
+Games Vault is a web app for browsing, organizing and discovering Steam games. You can search and filter the full Steam catalog by genre, tag, platform and language, build your own game library (or import it from your Steam account), and chat with an AI assistant. The assistant recommends games and answers questions about them using semantic search over the game database.
+
 ## Tech Stack
 
 ### Front-end
@@ -12,6 +14,7 @@
 
 - Pyhton
 - FastApi
+- LangGraph + Gemini
 
 ### Database
 
@@ -21,11 +24,42 @@
 ## Folders
 
 - backend – Contains the main server logic
-- chatbot – Temporary folder containing tested chatbot logic
 - frontend – User interface and visual components of the application
 - db – PostgreSQL Docker image, database backup and restore script
 
-## Installation
+## Installation (Docker)
+
+project has setup docker system for whole project: backend, frontend, postgresSQL server.
+
+Requires Docker Compose 2.22+ (for `--watch`).
+
+1. Create the `.env` file and fill in the values from `.env.example`:
+
+```
+cp .env.example .env
+```
+
+2. Run with build (first time, or after changing a Dockerfile or anything in `db/`):
+
+```
+docker compose up --build --watch
+```
+
+3. Run (normal use):
+
+```
+docker compose up --watch
+```
+
+| Service         | Host port |
+| --------------- | --------- |
+| web (frontend)  | 3000      |
+| api (backend)   | 8000      |
+| db (PostgreSQL) | 5433      |
+
+The database is restored from `db/GamesVault_DB.backup` only on first start (empty volume). To restore a changed backup, run `docker compose down -v` first (this deletes the database data). Docker uses Python 3.12 and Node 20.
+
+## Installation (without Docker)
 
 Prerequisites:
 
@@ -47,6 +81,7 @@ To run the project locally, install PostgreSQL and the `pgvector` extension, cre
 Install PostgreSQL on your system. Make sure the PostgreSQL command-line tools (`psql` and `pg_restore`) are available.
 
 Verify the installation:
+
 ```bash
 psql --version
 pg_restore --version
@@ -107,7 +142,6 @@ psql -U postgres -p 5432 -d gamesvault -c "SELECT extname FROM pg_extension WHER
 ```
 
 The database should now contain the tables and data provided by `GamesVault_DB.backup`.
-
 
 ### Front-end Setup
 
@@ -185,26 +219,6 @@ DB_LINK=
 uvicorn main:app --port 8000
 ```
 
-## Docker
+## In progress:
 
-project has setup docker system for whole project: backend, frontend, postgresSQL server.
-
-1. Create the `.env` file (sets the database password):
-
-```
-cp .env.example .env
-```
-
-2. Run:
-
-```
-docker compose up --build --watch
-```
-
-| Service         | Host port |
-| --------------- | --------- |
-| web (frontend)  | 3000      |
-| api (backend)   | 8000      |
-| db (PostgreSQL) | 5432      |
-
-The database is restored from `db/GamesVault_DB.backup` on first start. Docker uses Python 3.12 and Node 20.
+-

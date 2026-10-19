@@ -65,6 +65,7 @@
     border-radius: 10px;
     opacity: 0;
     transition: opacity 0.15s;
+    z-index: 100;
 
     /* no hover on touch screens — keep badges visible there */
     @media (hover: none) {
@@ -84,8 +85,8 @@
   &__badge {
     position: relative;
     z-index: 1;
-    width: 27px;
-    height: 27px;
+    width: 30px;
+    height: 30px;
     border: 1px solid $color-border-gray;
     background: rgba(255, 255, 255, 0.12);
     border-radius: 50%;
@@ -93,10 +94,6 @@
 
     &:hover {
       background: rgba(255, 255, 255, 0.22);
-    }
-
-    &--show {
-      background-color: $color-yellow;
     }
   }
 
@@ -106,12 +103,19 @@
     z-index: 0;
     top: 2px;
     left: 2px;
-    width: 27px;
-    height: 27px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: $color-yellow;
-    transform: translateX(calc(var(--i) * 31px));
-    transition: transform 0.2s ease;
+    transform: translateX(calc(var(--i) * 34px));
+    opacity: 0;
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+
+    &--show {
+      opacity: 1;
+    }
   }
 
   &__badgeIcon {

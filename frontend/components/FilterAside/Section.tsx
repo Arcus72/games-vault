@@ -52,11 +52,12 @@ export default function Section({
       {s.type === "select" && (
         <select
           className="FilterAside__select"
-          value={(values[s.name] as string) ?? ""}
-          onChange={(e) => set(s.name, e.target.value || null)}
+          // <option> values must be strings, so use the index and map back to the object
+          value={Math.max(0, s.options.findIndex((o) => o.value === values[s.name]))}
+          onChange={(e) => set(s.name, s.options[+e.target.value].value)}
         >
-          {s.options.map((o) => (
-            <option key={o.label} value={o.value ?? ""}>
+          {s.options.map((o, i) => (
+            <option key={o.label} value={i}>
               {o.label}
             </option>
           ))}

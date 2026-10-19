@@ -14,11 +14,12 @@ export default function RegisterPage() {
     const data = Object.fromEntries(new FormData(e.currentTarget));
 
     const newUserData = {
-      username: data.userSteamID,
+      username: data.username,
       email: data.email,
       password: data.password,
-      phone: "485544465",
     } as CreateUserData;
+
+    console.log(newUserData);
 
     createUser(newUserData)
       .then((res) => {
@@ -36,11 +37,11 @@ export default function RegisterPage() {
         <h1 className="auth__title">Zarejestruj się</h1>
 
         <label className="auth__field">
-          <span className="auth__label">Twój Steam ID</span>
+          <span className="auth__label">Login</span>
           <input
             className="auth__input"
-            name="userSteamID"
-            placeholder="STEAM_0:1:12345678"
+            name="username"
+            placeholder="jan.kowalski"
             minLength={8}
             required
           />

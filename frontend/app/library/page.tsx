@@ -6,35 +6,46 @@ import FilterAside from "../../components/FilterAside/FilterAside";
 import GameCard from "../../components/GameCard/GameCard";
 import Pagination from "../../components/Pagination/Pagination";
 import Fab from "../../components/Fab/Fab";
-import { getGames } from "../../lib/api";
+import { getUserGames } from "../../lib/api";
 import type { Game } from "../../interfaces/main";
+import { FilterValues } from "../../interfaces/main";
+import { showMessage } from "@/components/Message/Message";
 
 const views = [
-  { id: "all", label: "Moje gry" },
+  { id: 2, label: "Moje gry" },
   {
-    id: "wishlist",
+    id: 1,
     label: "Lista życzeń",
     icon: "/assets/toggle-wishlist.svg",
   },
-  { id: "hidden", label: "Ukryte", icon: "/assets/toggle-hidden.svg" },
+  { id: 3, label: "Ukryte", icon: "/assets/toggle-hidden.svg" },
 ] as const;
 
 export default function LibraryPage() {
   const [games, setGames] = useState<Game[]>([]);
-  const [view, setView] = useState<(typeof views)[number]["id"]>("all");
+  const [gameStatus, setGameStatus] = useState<1 | 2 | 3>(2);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
+  const [filters, setFilters] = useState<FilterValues | null>(null);
 
   useEffect(() => {
-    getGames({
-      type: view,
-      pagination: { currentPage: page, totalPages },
-    }).then((res) => {
-      setGames(res?.games ?? []);
-      setPage(res?.page ?? 1);
-      setTotalPages(res?.pages ?? 1);
-    });
-  }, [page, view]);
+    const filterData = { page: page, ...filters, status: gameStatus };
+
+    getUserGames(filterData)
+      .then((res) => {
+        console.log(res);
+
+        setGames(res?.games ?? []);
+        setPage(res?.page ?? 1);
+        setTotalPages(res?.pages ?? 1);
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+        setGames([]);
+        setPage(1);
+        setTotalPages(1);
+      });
+  }, [page, gameStatus, filters]);
 
   return (
     <main className="page">
@@ -46,8 +57,8 @@ export default function LibraryPage() {
               {views.map((v) => (
                 <button
                   key={v.id}
-                  className={`Library__btn${view === v.id ? " Library__btn--active" : ""}`}
-                  onClick={() => setView(v.id)}
+                  className={`Library__btn${gameStatus === v.id ? " Library__btn--active" : ""}`}
+                  onClick={() => setGameStatus(v.id)}
                 >
                   {"icon" in v && <img className="Library__icon" src={v.icon} alt="" />}
                   {v.label}
@@ -55,18 +66,18 @@ export default function LibraryPage() {
               ))}
             </div>
           </section>
-          <FilterAside
-            onSave={(filters) =>
-              getGames({ page, filters }).then((res) => setGames(res?.games ?? []))
-            }
-          />
+          <FilterAside onSave={setFilters} />
         </div>
         <section className="layout__content">
-          <div className="grid">
-            {games.map((g) => (
-              <GameCard key={g.appid} game={g} />
-            ))}
-          </div>
+          {games.length == 0 ? (
+            <div className="Library__noGameFound">Żadna gra nie została jeszcze dodana</div>
+          ) : (
+            <div className="grid">
+              {games.map((g) => (
+                <GameCard key={g.appid} game={g} isBadgesVisible={true} showOnlyStatsu={gameStatus} />
+              ))}
+            </div>
+          )}
           <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
         </section>
       </div>

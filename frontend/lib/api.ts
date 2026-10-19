@@ -6,6 +6,8 @@ import type {
   GetGames,
   SimpleMessage,
   LoginData,
+  GetUserGames,
+  StatusChangeResponse,
 } from "../interfaces/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -72,8 +74,8 @@ async function del<T>(path: string): Promise<T> {
   return data as T;
 }
 
-export const getUserGames = (data: GetGames): Promise<GamesResponse> =>
-  post<GamesResponse>("/api/get_steam_games", data);
+export const getUserGames = (data: GetUserGames): Promise<GamesResponse> =>
+  post<GamesResponse>("/api/get_user_library", data);
 
 export const getGames = (data: GetGames): Promise<GamesResponse> =>
   post<GamesResponse>("/api/get_steam_games", data);
@@ -108,11 +110,15 @@ export const loadAtributeListForFilter = async (
   return atributesList;
 };
 
-export const hideGame = (app_id: number): Promise<SimpleMessage> =>
-  post<SimpleMessage>("/api/hide_game", app_id);
+export const toggleGameStatus = (
+  app_id: number,
+  statusToToggle: "wishlist" | "library" | "hidden",
+) => {
+  const apiMap = {
+    wishlist: "/api/toggle_wishlist_game",
+    hidden: "/api/toggle_hide_game",
+    library: "/api/toggle_library_game",
+  };
 
-export const addGameToWishlist = (app_id: number): Promise<SimpleMessage> =>
-  post<SimpleMessage>("/api/add_game_to_wishlist", app_id);
-
-export const addGameToLibrary = (app_id: number): Promise<SimpleMessage> =>
-  post<SimpleMessage>("/api/add_game_to_library", app_id);
+  return post<StatusChangeResponse>(apiMap[statusToToggle], app_id);
+};

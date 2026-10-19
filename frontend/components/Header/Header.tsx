@@ -8,9 +8,9 @@ import { logoutUser } from "@/lib/api";
 import { showMessage } from "../Message/Message";
 import { useRouter } from "next/navigation";
 const links = [
-  { href: "/", label: "Galeria" },
-  { href: "/library", label: "Moja biblioteka" },
-  { href: "/chatbot", label: "Chat bot" },
+  { href: "/", label: "Galeria", onlyIfUserLogged: false },
+  { href: "/library", label: "Moja biblioteka", onlyIfUserLogged: true },
+  { href: "/chatbot", label: "Chat bot", onlyIfUserLogged: true },
 ];
 
 export default function Header() {
@@ -40,15 +40,17 @@ export default function Header() {
         </span>
       </Link>
       <nav className="Header__nav">
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className={`Header__link${pathname === l.href ? " Header__link--active" : ""}`}
-          >
-            {l.label}
-          </Link>
-        ))}
+        {links
+          .filter((l) => !l.onlyIfUserLogged || isLogged())
+          .map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`Header__link${pathname === l.href ? " Header__link--active" : ""}`}
+            >
+              {l.label}
+            </Link>
+          ))}
       </nav>
       <DynamicSearchBar />
       {isLogged() ? (
@@ -56,7 +58,10 @@ export default function Header() {
           <Link className="Header__userButton" href="/ustawienia">
             Ustawienia
           </Link>
-          <button className="Header__userButton" onClick={() => logoutHandler()}>
+          <button
+            className="Header__userButton Header__userButton--logout"
+            onClick={() => logoutHandler()}
+          >
             logout
           </button>
         </>

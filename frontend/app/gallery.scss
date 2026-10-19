@@ -88,9 +88,14 @@
       border-bottom-width: 4px;
     }
   }
+
+  &__noGameFound {
+    font-size: $font-size-2xl;
+    text-align: center;
+    width: 100%;
+  }
 }
 
-/* sibling of .Gallery in the DOM, so it can't nest inside it */
 .Gallery__strip {
   height: 45px;
   background-image: repeating-linear-gradient(

@@ -74,6 +74,11 @@
 
   &__userButton {
     margin: 0 10px;
+
+    &--logout {
+      font-size: $font-size-base;
+      color: red;
+    }
   }
 
   @media (max-width: 900px) {

@@ -30,7 +30,7 @@ export type FilterSection =
       type: "select";
       label: string;
       name: string;
-      options: { label: string; value: string | null }[];
+      options: { label: string; value: SortValue }[];
       open?: boolean;
     };
 
@@ -39,9 +39,7 @@ export interface Game {
   name: string;
   price: number;
   header_image: string;
-  isHidden: boolean | null;
-  library_wishlist: number | null;
-  release_date: string | null;
+  status: number; // 0 -> Brak 1 -> Wishlist 2 -> Library 3 -> Library_Hidden
   steam_url?: string;
 }
 
@@ -49,13 +47,13 @@ export interface ChatGame {
   appid: number;
   title: string;
   price: number;
-  currency: string;
-  isWishList: boolean;
+  status: number;
   imgUrl: string;
-  steamUrl: string;
 }
 
-export type FilterValues = Record<string, string | number | string[] | null>;
+export type SortValue = { sort_by: string; ascending: number };
+
+export type FilterValues = Record<string, string | number | string[] | SortValue | null>;
 
 export interface FilterData {
   name: string | null;

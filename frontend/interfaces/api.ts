@@ -30,11 +30,19 @@ export interface SearchBarGameResponse {
   capsule_image: string;
 }
 
-export interface GetGames {
+export interface GetGames extends FilterValues {
   page: number;
-  filters: FilterValues | null;
+}
+
+export interface GetUserGames extends GetGames {
+  status: number;
 }
 
 export interface SimpleMessage {
+  message: string;
+}
+
+export interface StatusChangeResponse {
+  status: number;
   message: string;
 }

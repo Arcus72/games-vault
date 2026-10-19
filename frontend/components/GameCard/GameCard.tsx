@@ -1,42 +1,58 @@
 "use client";
 import type { Game } from "../../interfaces/main";
+import type { StatusChangeResponse } from "../../interfaces/api";
 import { useState } from "react";
-import { addGameToLibrary } from "@/lib/api";
+import { toggleGameStatus } from "@/lib/api";
 import "./GameCard.scss";
 import { showMessage } from "../Message/Message";
 type GameStatus = "hidden" | "wishlist" | "library" | null;
 
-// const getGameSatus = (game: Game): GameStatus => {
-//   console.log(game.name, game.isHidden, game.library_wishlist);
-//   return null;
-// };
+interface Badge {
+  id: number;
+  status: Exclude<GameStatus, null>;
+  icon: string;
+  alt: string;
+}
 
-const BADGES: { status: Exclude<GameStatus, null>; icon: string; alt: string }[] = [
-  // { status: "hidden", icon: "/assets/icon-hidden.svg", alt: "Ukryte" },
-  // { status: "wishlist", icon: "/assets/icon-wishlist.svg", alt: "Lista życzeń" },
-  { status: "library", icon: "/assets/icon-plus.svg", alt: "Dodaj" },
+const BADGES: Badge[] = [
+  // id = Game.status z backendu (1 wishlist, 2 library, 3 hidden); kolejność w tablicy = pozycja slidera
+  { id: 2, status: "library", icon: "/assets/icon-plus.svg", alt: "Dodaj" },
+  { id: 1, status: "wishlist", icon: "/assets/icon-wishlist.svg", alt: "Lista życzeń" },
+  { id: 3, status: "hidden", icon: "/assets/icon-hidden.svg", alt: "Ukryte" },
 ];
 
 interface Props {
   game: Game;
   isBadgesVisible?: boolean;
+  showOnlyStatsu?: null | 1 | 2 | 3;
 }
 
-export default function GameCard({ game, isBadgesVisible = false }: Props) {
-  const [isInLibrary, setIsInLibrary] = useState<boolean>((game.library_wishlist || 0) == 1);
+export default function GameCard({ game, isBadgesVisible = true, showOnlyStatsu = null }: Props) {
+  const [gameStatus, setGameStatus] = useState<number>(game.status);
+  const [isStatusEditable, setIsStatusEditable] = useState<boolean>(true);
 
-  const changeGameStatus = () => {
-    if (game.appid) {
-      addGameToLibrary(game.appid)
-        .then((res) => {
-          setIsInLibrary(true);
-          showMessage(res.message);
-        })
-        .catch((error) => {
-          showMessage(error.message, "error");
-        });
-    }
+  const sliderIndex = BADGES.findIndex((b) => b.id === gameStatus);
+
+  const changeGameStatus = (app_id: number, sourceBtn: "library" | "wishlist" | "hidden") => {
+    if (!isStatusEditable) return;
+
+    setIsStatusEditable(false);
+    toggleGameStatus(app_id, sourceBtn)
+      .then((res: StatusChangeResponse) => {
+        console.log(res);
+
+        setGameStatus(res.status);
+        showMessage(res.message);
+      })
+      .catch((error) => {
+        showMessage(error.message, "error");
+      })
+      .finally(() => {
+        setIsStatusEditable(true);
+      });
   };
+
+  if (showOnlyStatsu && showOnlyStatsu !== gameStatus) return null;
 
   return (
     <a
@@ -51,25 +67,23 @@ export default function GameCard({ game, isBadgesVisible = false }: Props) {
         <span className="GameCard__nameBar" />
         <span className="GameCard__name">{game.name}</span>
       </div>
-      {game.price && <span className="GameCard__price">{game.price}</span>}
+      {game.price && <span className="GameCard__price">{game.price.toFixed(2)} zł</span>}
       {isBadgesVisible && (
-        <div className={`GameCard__badges ${isInLibrary && "GameCard__badges--show"}`}>
-          {/* {gameStat != null && (
+        <div className={`GameCard__badges ${sliderIndex >= 0 ? "GameCard__badges--show" : ""}`}>
           <span
-            className="GameCard__badgeSlider"
-            style={{ "--i": BADGES.findIndex((b) => b.status === gameStat) } as React.CSSProperties}
+            className={`GameCard__badgeSlider ${sliderIndex >= 0 ? "GameCard__badgeSlider--show" : ""}`}
+            style={{ "--i": Math.max(sliderIndex, 0) } as React.CSSProperties}
           />
-        )} */}
-          {BADGES.map(({ status, icon, alt }) => (
+          {BADGES.map(({ id, status, icon, alt }) => (
             <button
-              key={status}
+              key={id}
               type="button"
-              className={`GameCard__badge ${isInLibrary && "GameCard__badge--show"}`}
+              className="GameCard__badge"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                changeGameStatus();
+                changeGameStatus(game.appid, status);
               }}
             >
               <img className="GameCard__badgeIcon" src={icon} alt={alt} />
