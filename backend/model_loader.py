@@ -17,7 +17,7 @@ def get_embedding_model(settings: Settings = get_settings()) -> SentenceTransfor
     """Zwraca instancję modelu embeddingów"""
 
     print("Ładowanie modelu " + settings.MODEL_NAME + " do pamięci...")
-    model = SentenceTransformer(settings.MODEL_NAME, trust_remote_code=True)
+    model = SentenceTransformer(settings.MODEL_NAME, token=settings.HF_TOKEN, trust_remote_code=True)
     print("Model załadowany pomyślnie.")
 
     return model

@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     STEAM_API_KEY: str
     GEMINI_API: str
     MODEL_NAME: str
+    HF_TOKEN: str
 
     class Config:
         env_file = ".env"
