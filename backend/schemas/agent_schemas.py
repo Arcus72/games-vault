@@ -11,6 +11,7 @@ class AgentState(TypedDict):
 
     active_game: str | None
     filters: GameFilter | None
+    references: str | None
 
     results: list[dict[str, Any]]
     games: list[dict[str, Any]]

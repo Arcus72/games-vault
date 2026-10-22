@@ -1,9 +1,11 @@
-from schemas.agent_schemas import AgentState
 from typing import Any
-from database.database import get_db
-from database.models import SteamGames
 import numpy as np
+
+from database.database import get_db
+from database.models import SteamGames, Genres, Languages, Tags, Platforms
+from schemas.agent_schemas import AgentState
 from model_loader import get_embedding_model
+from agents.tools import apply_filters
 
 
 def recommendation_node(state: AgentState) -> AgentState:
@@ -48,16 +50,7 @@ def recommendation_node(state: AgentState) -> AgentState:
         )
 
         # Aplikujemy dodatkowe filtry
-        for filter_name, value in filters.items():
-            if value is None or value == "" or value == []:
-                continue
-
-            if filter_name == "price_max":
-                query = query.filter(SteamGames.price <= value)
-            elif filter_name == "release_date_min_year":
-                query = query.filter(SteamGames.release_date >= value)
-            elif filter_name == "release_date_max_year":
-                query = query.filter(SteamGames.release_date <= value)
+        query = apply_filters(query, filters)
 
         # Pobieramy TOP 5 gier najbardziej podobnych do profilu użytkownika
         matched_games = (

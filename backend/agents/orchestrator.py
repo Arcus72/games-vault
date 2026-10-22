@@ -2,8 +2,50 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from model_loader import get_llm_model
 from schemas.agent_schemas import AgentState, IntentClassifier
+from database.database import get_db
+from database.models import Genres, Languages, Platforms, Tags
 
-orchestrator_system_prompt = SystemMessage(content="""
+
+def orchestrator_node(state: AgentState):
+    model = get_llm_model()
+    structured_llm = model.with_structured_output(IntentClassifier)
+
+    orchestrator_system_prompt = get_orchestrator_prompt()
+
+    messages = [
+        SystemMessage(content=orchestrator_system_prompt.content),
+        HumanMessage(content=state["messages"][-1].content),
+    ]
+
+    result = structured_llm.invoke(messages)
+    print(f"📝 Intent: {result.message_intent}")
+    if result.filters:
+        print(f"🔍 Filtry: {result.filters}")
+    print(f"🎯 Active game: {result.active_game}")
+
+    return {
+        "message_intent": result.message_intent,
+        "filters": result.filters.model_dump() if result.filters else {},
+        "active_game": (
+            result.active_game if result.active_game else state.get("active_game")
+        ),
+    }
+
+
+def get_orchestrator_prompt() -> SystemMessage:
+    db = next(get_db())
+    try:
+        # Pobieramy unikalne wartości z bazy
+        available_genres = [g.genre for g in db.query(Genres.genre).all()]
+        available_platforms = [p.platform for p in db.query(Platforms.platform).all()]
+        available_languages = [l.language for l in db.query(Languages.language).all()]
+
+        # Jeśli tagów jest bardzo dużo (np. tysiące), pobieramy np. TOP 100 najpopularniejszych
+        available_tags = [t.tag for t in db.query(Tags.tag).limit(100).all()]
+    finally:
+        db.close()
+
+    content = f"""
 Jesteś Agentem Koordynatorem (Coordinator Agent) systemu wieloagentowego dedykowanego grom na platformie Steam.
 
 # JĘZYK KOMUNIKACJI I ODPOCZYNKU
@@ -29,29 +71,21 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
 
 Przykłady:
 Użytkownik: "Poleć gry podobne do Elden Ring tańsze niż 200 PLN"
-→ intent: "recommendation", filters: {"max_price": 200}, reference: "Elden Ring"
+→ intent: "recommendation", filters: dict("max_price": 200), reference: "Elden Ring"
 
 Użytkownik: "Gra survivalowa z rozbudową bazy"
 → intent: "semantic_search"
-""")
 
-def orchestrator_node(state: AgentState):
-    model = get_llm_model()
-    structured_llm = model.with_structured_output(IntentClassifier)
+# DOZWOLONE WARTOŚCI FILTRÓW (ALLOWED FILTER VALUES)
+Wszystkie dopasowane filtry MUSZĄ dokładnie odpowiadać wartościom z poniższych list:
 
-    messages = [
-        SystemMessage(content=orchestrator_system_prompt.content),
-        HumanMessage(content=state["messages"][-1].content)
-    ]
+- **DOZWOLONE GATUNKI (genres)**: {available_genres}
+- **DOZWOLONE PLATFORMY (platforms)**: {available_platforms}
+- **DOZWOLONE JĘZYKI (languages)**: {available_languages}
+- **DOZWOLONE TAGI (tags)**: {available_tags}
 
-    result = structured_llm.invoke(messages)
-    print(f"📝 Intent: {result.message_intent}")
-    if result.filters:
-        print(f"🔍 Filtry: {result.filters}")
-    print(f"🎯 Active game: {result.active_game}")
+ZASADA MAPOWANIA: Jeśli użytkownik użyje odmiany słowa (np. "gry strategiczne"), ZAWSZE zamień ją na dokładny odpowiednik z powyższych list (np. "strategie").
 
-    return {
-        "message_intent": result.message_intent,
-        "filters": result.filters.model_dump() if result.filters else {},
-        "active_game": result.active_game if result.active_game else state.get("active_game"),
-    }
+Filtry wyciągaj tylko i wyłącznie z tego co napisze użytkownik.
+"""
+    return SystemMessage(content=content)

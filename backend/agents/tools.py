@@ -1,6 +1,62 @@
 from langchain_core.tools import tool
 import requests
 
+from database.models import SteamGames, Genres, Languages, Tags, Platforms
+
+
+def apply_filters(query, filters: dict):
+    """Aplikuje filtry użytkownika do zapytania SQLAlchemy."""
+    if not filters:
+        return query
+
+    for filter_name, value in filters.items():
+        if value is None or value == "" or value == []:
+            continue
+
+        # Filtry ceny
+        if filter_name == "price_max":
+            query = query.filter(SteamGames.price <= value)
+
+        # Filtry premier
+        elif filter_name == "IsReleased":
+            if value is True:
+                query = query.filter(
+                    SteamGames.release_date.isnot(None), SteamGames.release_date != ""
+                )
+            elif value is False:
+                query = query.filter(
+                    (SteamGames.release_date.is_(None))
+                    | (SteamGames.release_date == "")
+                )
+
+        # Filtry dat
+        elif filter_name == "release_date_min_year":
+            query = query.filter(SteamGames.release_date >= value)
+        elif filter_name == "release_date_max_year":
+            query = query.filter(SteamGames.release_date <= value)
+
+        # Filtry gatunków
+        elif filter_name == "genres":
+            for genre_name in value:
+                query = query.filter(SteamGames.genres.any(Genres.genre.ilike(f"%{genre_name}%")))
+
+        # Filtry języków
+        elif filter_name == "languages":
+            for lang_name in value:
+                query = query.filter(SteamGames.languages.any(Languages.language.ilike(f"%{lang_name}%")))
+
+        # Filtry tagów
+        elif filter_name == "tags":
+            for tag_name in value:
+                query = query.filter(SteamGames.tags.any(Tags.tag.ilike(f"%{tag_name}%")))
+
+        # Filtry platform
+        elif filter_name == "platforms":
+            for platform_name in value:
+                query = query.filter(SteamGames.platforms.any(Platforms.platform.ilike(f"%{platform_name}%")))
+
+    return query
+
 
 @tool
 def currency_converter_to_PLN(amount, from_currency):

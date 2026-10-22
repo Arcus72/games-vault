@@ -1,6 +1,7 @@
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from model_loader import get_llm_model
 from schemas.agent_schemas import AgentState
+from sqlalchemy.orm import selectinload
 from database.database import get_db
 from database.models import SteamGames
 
@@ -36,56 +37,72 @@ def response_node(state: AgentState) -> dict:
             if intent == "semantic_search"
             else "Niestety nie znalazłem żadnych rekomendacji gier dopasowanych do Twojego profilu i filtrów."
         )
-        return {"messages": [AIMessage(content=msg)]}
+        return {
+            "messages": [AIMessage(content=[{"type": "text", "text": msg}])],
+            "games": [],
+        }
 
     db = next(get_db())
     try:
 
         # Pobranie danych z bazy
         matched_games = (
-            db.query(
-                SteamGames.appid,
-                SteamGames.name,
-                SteamGames.short_description,
-                SteamGames.about_the_game,
-                SteamGames.publisher,
-                SteamGames.price,
-                SteamGames.release_date,
-                SteamGames.pc_requirements,
-                SteamGames.header_image_url,
-                SteamGames.background_image_url,
+            db.query(SteamGames)
+            .options(
+                selectinload(SteamGames.genres),
+                selectinload(SteamGames.platforms),
+                selectinload(SteamGames.languages),
+                selectinload(SteamGames.tags),
             )
             .filter(SteamGames.appid.in_(results))
             .all()
         )
 
         if not matched_games:
+            msg = "Nie znaleziono szczegółów dotyczących wybranych gier."
             return {
-                "messages": [
-                    AIMessage(
-                        content="Nie znaleziono szczegółów dotyczących wybranych gier."
-                    )
-                ]
+                "messages": [AIMessage(content=[{"type": "text", "text": msg}])],
+                "games": [],
             }
 
         # Budowanie kontekstu dla LLM zależnie od intencji
         if intent == "game_info":
             game = matched_games[0]
+
+            # Formatowanie relacji many-to-many do czytelnych ciągów tekstowych
+            genres_str = ", ".join([g.genre for g in game.genres]) if game.genres else "Brak"
+            platforms_str = ", ".join([p.platform for p in game.platforms]) if game.platforms else "Brak"
+            languages_str = ", ".join([l.language for l in game.languages]) if game.languages else "Brak"
+            tags_str = ", ".join([t.tag for t in game.tags]) if game.tags else "Brak"
+
             context_str = (
-                f"Tytuł/Opis: {game.short_description}\n"
-                f"Wydawca: {game.publisher}\n"
-                f"Data premiery: {game.release_date}\n"
+                f"Tytuł: {game.name}\n"
+                f"Krótki opis: {game.short_description or 'Brak'}\n"
+                f"O grze: {game.about_the_game or 'Brak'}\n"
+                f"Wydawca: {game.publisher or 'Brak'}\n"
+                f"Deweloper: {game.developer or 'Brak'}\n"
+                f"Data premiery: {game.release_date or 'Brak'}\n"
+                f"Ocena Metacritic: {game.metacritic_score or 'Brak'}\n"
+                f"Wymagania PC: {game.pc_requirements or 'Brak'}\n"
                 f"Cena: {game.price}\n"
-                f"Wymagania PC: {game.pc_requirements}\n"
-                f"O grze: {game.about_the_game}"
+                f"Gatunki: {genres_str}\n"
+                f"Platformy: {platforms_str}\n"
+                f"Języki: {languages_str}\n"
+                f"Tagi: {tags_str}\n"
             )
             instructions = "Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych:"
 
         elif intent == "semantic_search":
             context_str = "\n".join(
                 [
-                    f"--- GAME ---\nTytuł: {g.name}\nWydawca: {g.publisher}\n"
-                    f"Data premiery: {g.release_date}\nCena: {g.price}\nOpis: {g.short_description}\n"
+                    f"--- ZNALEZIONA GRA ---\n"
+                    f"Tytuł: {g.name or 'Brak'}\n"
+                    f"Opis: {g.short_description or 'Brak'}\n"
+                    f"O grze: {g.about_the_game or 'Brak'}\n"
+                    f"Wydawca: {g.publisher or 'Brak'}\n"
+                    f"Data premiery: {g.release_date or 'Brak'}\n"
+                    f"Cena: {g.price or 'Brak'}\n"
+                    f"Gatunki: {', '.join([genre.genre for genre in g.genres]) if g.genres else 'Brak'}\n"
                     for g in matched_games
                 ]
             )
@@ -98,8 +115,14 @@ def response_node(state: AgentState) -> dict:
         elif intent == "recommendation":
             context_str = "\n".join(
                 [
-                    f"--- DEDYKOWANA REKOMENDACJA ---\nTytuł: {g.name}\nWydawca: {g.publisher}\n"
-                    f"Data premiery: {g.release_date}\nCena: {g.price}\nOpis: {g.short_description}\n"
+                    f"--- DEDYKOWANA REKOMENDACJA ---\n"
+                    f"Tytuł: {g.name or 'Brak'}\n"
+                    f"Opis: {g.short_description or 'Brak'}\n"
+                    f"O grze: {g.about_the_game or 'Brak'}\n"
+                    f"Wydawca: {g.publisher or 'Brak'}\n"
+                    f"Data premiery: {g.release_date or 'Brak'}\n"
+                    f"Cena: {g.price or 'Brak'}\n"
+                    f"Gatunki: {', '.join([genre.genre for genre in g.genres]) if g.genres else 'Brak'}\n"
                     for g in matched_games
                 ]
             )
@@ -109,7 +132,9 @@ def response_node(state: AgentState) -> dict:
                 "Odpowiadaj WYŁĄCZNIE na podstawie poniższego kontekstu z bazy danych:"
             )
         else:
-            return {"messages": [AIMessage(content="Nieznana intencja wiadomości.")]}
+            return {
+                "messages": [AIMessage(content=[{"type": "text", "text": "Nieznana intencja wiadomości."}])]
+            }
 
         # Generowanie odpowiedzi przez LLM
         system_prompt = SystemMessage(
