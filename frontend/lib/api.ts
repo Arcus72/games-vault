@@ -1,3 +1,4 @@
+import { ClientPageRoot } from "next/dist/client/components/client-page";
 import type {
   GamesResponse,
   MessageResponse,
@@ -8,11 +9,14 @@ import type {
   LoginData,
   GetUserGames,
   StatusChangeResponse,
+  NewPasswordData,
 } from "../interfaces/api";
-
+import { AuthUser } from "../interfaces/main";
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 async function post<T>(path: string, body: unknown): Promise<T> {
+  console.log(body);
+
   const res = await fetch(`${API_URL}${path}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -83,13 +87,23 @@ export const getGames = (data: GetGames): Promise<GamesResponse> =>
 export const sendMessage = (data: unknown): Promise<MessageResponse> =>
   post<MessageResponse>("/api/message", data);
 
-export const createUser = (data: CreateUserData) =>
-  post<{ message: string }>("/api/create_user", data);
+export const createUser = (data: CreateUserData) => post<SimpleMessage>("/api/create_user", data);
+
+export const updatePassword = (data: NewPasswordData) =>
+  post<SimpleMessage>("/api/change_password", data);
+
+export const updateSteamId = (newSteamID: string) =>
+  post<SimpleMessage>("/api/add_steam_id", { steam_id: newSteamID });
+
+export const loadSteamLibrary = (): Promise<SimpleMessage> =>
+  post<SimpleMessage>("/api/add_games_from_steam", {});
 
 export const logoutUser = () => del<SimpleMessage>("/api/logout");
 
-export const loginUser = (data: LoginData) =>
-  post<{ message: string; user_id: string }>("/api/login", data);
+export const loginUser = async (data: LoginData): Promise<AuthUser> => {
+  await post<SimpleMessage>("/api/login", data);
+  return await get<AuthUser>("/api/get_user_info");
+};
 
 export const getSearchResults = (filter: string): Promise<SearchBarGameResponse[]> =>
   get<SearchBarGameResponse[]>(`/api/games_search_bar?${new URLSearchParams({ filter })}`);

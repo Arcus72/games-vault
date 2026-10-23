@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Markdown from "react-markdown";
 import "./chat.scss";
 import FilterAside from "@/components/FilterAside/FilterAside";
@@ -8,6 +8,8 @@ import { FilterValues } from "../../interfaces/main";
 import GameCard from "../../components/GameCard/GameCard";
 import { sendMessage } from "../../lib/api";
 import type { ChatGame, Game } from "../../interfaces/main";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const SUGGESTIONS = Array(4).fill("Znajdź nową grę na podstawie mojej biblioteki");
 
@@ -37,6 +39,14 @@ export default function ChatView() {
   const [typing, setTyping] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filterValues, setFilterValues] = useState<FilterValues>({});
+  const { isLogged } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLogged()) {
+      router.push("/");
+    }
+  }, []);
 
   const send = async (text: string) => {
     if (!text.trim() || typing) return;

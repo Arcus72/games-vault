@@ -4,7 +4,7 @@ import "../auth.scss";
 import { loginUser } from "@/lib/api";
 import { showMessage } from "@/components/Message/Message";
 import { LoginData } from "@/interfaces/api";
-import { useAuth, AuthUser } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -16,15 +16,15 @@ export default function LoginPage() {
     const data = Object.fromEntries(new FormData(e.currentTarget));
 
     const newUserData = {
-      username_or_email: data.email_login,
+      username_or_email: String(data.email_login).trim(),
       password: data.password,
     } as LoginData;
 
     loginUser(newUserData)
       .then((res) => {
-        login({ email: newUserData.username_or_email });
-        showMessage(res.message, "success");
-        router.replace("/"); // bez wpisu w historii (dobre po loginie)
+        login(res);
+        showMessage("Zalogowano pomyślnie", "success");
+        router.replace("/");
       })
       .catch((error) => {
         showMessage(error.message, "error");
@@ -42,7 +42,7 @@ export default function LoginPage() {
             className="auth__input"
             type="email_login"
             name="email_login"
-            placeholder="you@example.com"
+            placeholder="jkowalski@example.com"
             autoComplete="email_login"
             required
           />

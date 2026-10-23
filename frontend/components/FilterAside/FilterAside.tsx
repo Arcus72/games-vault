@@ -5,7 +5,7 @@ import "./FilterAside.scss";
 import { FilterSection, FilterValues } from "../../interfaces/main";
 import Section from "./Section";
 import { loadAtributeListForFilter } from "@/lib/api";
-
+import Button from "../Button/Button";
 async function getConfig(): Promise<FilterSection[]> {
   const tags = await loadAtributeListForFilter("/api/get_tags", "gameTags");
 
@@ -38,9 +38,9 @@ async function getConfig(): Promise<FilterSection[]> {
       steps: [
         { label: "Za darmo", value: 0 },
         { label: "poniżej 20zł", value: 20 },
-        { label: "poniżej 50$", value: 50 },
-        { label: "poniżej 100$", value: 100 },
-        { label: "poniżej 200$", value: 200 },
+        { label: "poniżej 50zł", value: 50 },
+        { label: "poniżej 100zł", value: 100 },
+        { label: "poniżej 200zł", value: 200 },
         { label: "Bez limitu", value: null },
       ],
       open: true,
@@ -126,22 +126,17 @@ export default function FilterAside({
         <Section key={s.name} section={s} values={values} set={set} />
       ))}
       <div className="FilterAside__buttons">
-        <button
-          className="FilterAside__btn FilterAside__btn--save"
-          onClick={() => onSave?.(values)}
-        >
-          Zapisz
-        </button>
-        <button
-          className="FilterAside__btn FilterAside__btn--reset"
+        <Button text="Zapisz" onClick={() => onSave?.(values)} className="FilterAside__btn" />
+        <Button
+          text="Reset"
           onClick={() => {
             const initial = initialValues(config);
             setValues(initial);
             onChange?.(initial);
           }}
-        >
-          Resetuj
-        </button>
+          className="FilterAside__btn"
+          color="gray"
+        />
       </div>
     </aside>
   );

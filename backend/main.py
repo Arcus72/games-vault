@@ -10,7 +10,7 @@ from auth.user_auth import authenticate_session, create_new_session, authenticat
 from database.functions import gen_password_hash, get_filtered_steam_games, get_searched_games, filter_user_library, GamesPagination, GET_STEAM64, get_steam_library_games_list
 from database.models import Users, UserSession, SteamGames, SteamLanguages, SteamGenres, SteamTags, SteamPlatforms, UserGameLibrary, Tags, Platforms, Genres, Languages
 from fastapi.middleware.cors import CORSMiddleware
-from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, UserPasswordChange
+from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, UserPasswordChange, SteamIdUpdate 
 from graph import chatbot_app
 from langchain_core.messages import HumanMessage
 
@@ -124,7 +124,9 @@ def change_password(data: UserPasswordChange, user_session: UserSession = Depend
     return {"message": "Hasło zostało pomyślnie zmienione."}
 
 @app.post("/api/add_steam_id")
-def add_steam_id(steam_id: str, user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+def add_steam_id(data: SteamIdUpdate, user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
+    steam_id = data.steam_id
+    print(steam_id)
     if not steam_id or user_session.user_id is None or 'https://steamcommunity.com/' not in steam_id:
         raise HTTPException(status_code=400, detail="Nieprawidłowy link do profilu Steam.")
 

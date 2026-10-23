@@ -53,7 +53,7 @@ export default function RegisterPage() {
             className="auth__input"
             type="email"
             name="email"
-            placeholder="you@example.com"
+            placeholder="jkowalski@example.com"
             autoComplete="email"
             required
           />

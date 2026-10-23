@@ -19,6 +19,11 @@ export interface CreateUserData {
   password: string;
 }
 
+export interface NewPasswordData {
+  old_password: string;
+  new_password: string;
+}
+
 export interface LoginData {
   username_or_email: string;
   password: string;

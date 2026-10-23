@@ -70,6 +70,16 @@
     font-weight: 500;
     color: $color-text;
     text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+    transition: opacity 0.2s ease;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--blue {
+      background: linear-gradient(105deg, #3498db 0%, #2980b9 100%);
+    }
   }
 
   &__alt {

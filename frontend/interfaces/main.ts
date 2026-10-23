@@ -43,6 +43,12 @@ export interface Game {
   steam_url?: string;
 }
 
+export interface AuthUser {
+  username: string;
+  email: string;
+  steam_id: string;
+}
+
 export interface ChatGame {
   appid: number;
   title: string;

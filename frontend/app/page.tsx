@@ -10,6 +10,7 @@ import { getGames } from "../lib/api";
 import type { Game } from "../interfaces/main";
 import { FilterValues } from "../interfaces/main";
 
+import { useAuth } from "@/context/AuthContext";
 import { showMessage } from "@/components/Message/Message";
 
 export default function MainPage() {
@@ -17,6 +18,7 @@ export default function MainPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
   const [filters, setFilters] = useState<FilterValues | null>(null);
+  const { isLogged } = useAuth();
 
   useEffect(() => {
     const filterData = { page: page, ...filters };
@@ -65,14 +67,14 @@ export default function MainPage() {
           ) : (
             <div className="grid">
               {games.map((g) => (
-                <GameCard key={g.appid} game={g} isBadgesVisible={true} />
+                <GameCard key={g.appid} game={g} visibleBadges={isLogged() ? [1, 2] : []} />
               ))}
             </div>
           )}
           <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
         </section>
       </div>
-      {/* <Fab /> */}
+      {isLogged() && <Fab />}
     </main>
   );
 }

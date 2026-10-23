@@ -1,0 +1,47 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.Button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 24px;
+  border: none;
+  border-radius: $radius-btn;
+  color: $color-text;
+  font-family: inherit;
+  font-size: $font-size-xl;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    filter 0.2s ease,
+    transform 0.1s ease,
+    opacity 0.2s ease;
+
+  &:hover {
+    filter: brightness(1.08);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+  }
+
+  &--orange {
+    background: $grad-brand;
+    text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+  }
+
+  &--gray {
+    background: rgba(92, 92, 92, 0.32);
+    border: 2px solid $color-border-gray;
+  }
+}

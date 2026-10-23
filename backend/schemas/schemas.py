@@ -56,3 +56,5 @@ class GamesFilterRespone(BaseModel):
     page: int
     pages: int 
 
+class SteamIdUpdate(BaseModel):
+    steam_id: str

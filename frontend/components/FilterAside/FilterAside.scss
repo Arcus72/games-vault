@@ -242,19 +242,5 @@
   &__btn {
     flex: 1;
     height: 46px;
-    border-radius: $radius-btn;
-    font-size: $font-size-xl;
-    font-weight: 500;
-    color: $color-text;
-
-    &--save {
-      background: $grad-brand;
-      text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
-    }
-
-    &--reset {
-      background: rgba(92, 92, 92, 0.32);
-      border: 2px solid $color-border-gray;
-    }
   }
 }

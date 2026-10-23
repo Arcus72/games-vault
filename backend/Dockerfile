@@ -1,6 +1,7 @@
 FROM python:3.12-slim
 
 RUN useradd -m app
+RUN mkdir -p /home/app/.cache/huggingface && chown -R app:app /home/app/.cache
 WORKDIR /app
 
 COPY requirements.txt .

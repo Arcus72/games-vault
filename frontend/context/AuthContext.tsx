@@ -1,15 +1,13 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-
-export interface AuthUser {
-  email: string;
-}
+import { AuthUser } from "../interfaces/main";
 
 interface AuthContextValue {
   user: AuthUser | null;
   login: (user: AuthUser) => void;
   logout: () => void;
   isLogged: () => boolean;
+  updateUserData: <K extends keyof AuthUser>(name: K, value: AuthUser[K]) => void;
 }
 
 const STORAGE_KEY = "auth_user";
@@ -34,10 +32,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
   };
 
+  const updateUserData = <K extends keyof AuthUser>(name: K, value: AuthUser[K]) => {
+    setUser((prev) => {
+      let currentUser = prev;
+      if (!currentUser) {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            currentUser = JSON.parse(stored);
+          } catch {
+            currentUser = null;
+          }
+        }
+      }
+      if (!currentUser) return null;
+      const updated = { ...currentUser, [name]: value };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const isLogged = () => user !== null;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLogged }}>
+    <AuthContext.Provider value={{ user, login, logout, isLogged, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

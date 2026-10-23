@@ -10,6 +10,8 @@ import { getUserGames } from "../../lib/api";
 import type { Game } from "../../interfaces/main";
 import { FilterValues } from "../../interfaces/main";
 import { showMessage } from "@/components/Message/Message";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 const views = [
   { id: 2, label: "Moje gry" },
@@ -27,6 +29,14 @@ export default function LibraryPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
   const [filters, setFilters] = useState<FilterValues | null>(null);
+  const { isLogged } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLogged()) {
+      router.push("/");
+    }
+  }, []);
 
   useEffect(() => {
     const filterData = { page: page, ...filters, status: gameStatus };
@@ -74,7 +84,12 @@ export default function LibraryPage() {
           ) : (
             <div className="grid">
               {games.map((g) => (
-                <GameCard key={g.appid} game={g} isBadgesVisible={true} showOnlyStatsu={gameStatus} />
+                <GameCard
+                  key={g.appid}
+                  game={g}
+                  visibleBadges={[1, 2, 3]}
+                  showOnlyStatsu={gameStatus}
+                />
               ))}
             </div>
           )}
