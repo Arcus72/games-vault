@@ -67,28 +67,24 @@ def response_node(state: AgentState) -> dict:
 
         # Budowanie kontekstu dla LLM zależnie od intencji
         if intent == "game_info":
-            game = matched_games[0]
-
-            # Formatowanie relacji many-to-many do czytelnych ciągów tekstowych
-            genres_str = ", ".join([g.genre for g in game.genres]) if game.genres else "Brak"
-            platforms_str = ", ".join([p.platform for p in game.platforms]) if game.platforms else "Brak"
-            languages_str = ", ".join([l.language for l in game.languages]) if game.languages else "Brak"
-            tags_str = ", ".join([t.tag for t in game.tags]) if game.tags else "Brak"
-
-            context_str = (
-                f"Tytuł: {game.name}\n"
-                f"Krótki opis: {game.short_description or 'Brak'}\n"
-                f"O grze: {game.about_the_game or 'Brak'}\n"
-                f"Wydawca: {game.publisher or 'Brak'}\n"
-                f"Deweloper: {game.developer or 'Brak'}\n"
-                f"Data premiery: {game.release_date or 'Brak'}\n"
-                f"Ocena Metacritic: {game.metacritic_score or 'Brak'}\n"
-                f"Wymagania PC: {game.pc_requirements or 'Brak'}\n"
-                f"Cena: {game.price}\n"
-                f"Gatunki: {genres_str}\n"
-                f"Platformy: {platforms_str}\n"
-                f"Języki: {languages_str}\n"
-                f"Tagi: {tags_str}\n"
+            context_str = "\n\n".join(
+                [
+                    f"--- SZCZEGÓŁY GRA: {g.name} ---\n"
+                    f"Tytuł: {g.name or 'Brak'}\n"
+                    f"Krótki opis: {g.short_description or 'Brak'}\n"
+                    f"O grze: {g.about_the_game or 'Brak'}\n"
+                    f"Wydawca: {g.publisher or 'Brak'}\n"
+                    f"Deweloper: {g.developer or 'Brak'}\n"
+                    f"Data premiery: {g.release_date or 'Brak'}\n"
+                    f"Ocena Metacritic: {g.metacritic_score or 'Brak'}\n"
+                    f"Wymagania PC: {g.pc_requirements or 'Brak'}\n"
+                    f"Cena: {g.price or 'Brak'}\n"
+                    f"Gatunki: {', '.join([x.genre for x in g.genres]) if g.genres else 'Brak'}\n"
+                    f"Platformy: {', '.join([x.platform for x in g.platforms]) if g.platforms else 'Brak'}\n"
+                    f"Języki: {', '.join([x.language for x in g.languages]) if g.languages else 'Brak'}\n"
+                    f"Tagi: {', '.join([x.tag for x in g.tags]) if g.tags else 'Brak'}"
+                    for g in matched_games
+                ]
             )
             instructions = "Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych:"
 

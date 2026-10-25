@@ -11,16 +11,17 @@ from schemas.agent_schemas import AgentState
 def build_app():
     graph = StateGraph(AgentState)
 
-    # tool_node = ToolNode(tools=tools)
-
+    # Rejestracja węzłów
     graph.add_node("orchestrator", orchestrator_node)
     graph.add_node("recommendation_agent", recommendation_node)
     graph.add_node("semantic_search_agent", semantic_search_node)
     graph.add_node("info_agent", info_node)
     graph.add_node("response_agent", response_node)
 
+    # Start grafu
     graph.add_edge(START, 'orchestrator')
 
+    # Krawędź warunkowa z orchestratora
     graph.add_conditional_edges(
         'orchestrator', 
         lambda state: state['message_intent'],
@@ -31,6 +32,7 @@ def build_app():
         }
     )
 
+    # Krawędzie końcowe do agenta odpowiedzi
     graph.add_edge('recommendation_agent', 'response_agent')
     graph.add_edge('semantic_search_agent', 'response_agent')
     graph.add_edge('info_agent', 'response_agent')

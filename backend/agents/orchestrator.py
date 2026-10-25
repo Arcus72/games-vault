@@ -1,34 +1,46 @@
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.runnables import RunnableConfig
 
 from model_loader import get_llm_model
 from schemas.agent_schemas import AgentState, IntentClassifier
 from database.database import get_db
 from database.models import Genres, Languages, Platforms, Tags
+from agents.tools import merge_filters
 
 
-def orchestrator_node(state: AgentState):
+def orchestrator_node(state: AgentState, config: RunnableConfig):
+    # Inicjalizacja modelu LLM
     model = get_llm_model()
     structured_llm = model.with_structured_output(IntentClassifier)
 
+    # Pobranie promptu systemowego orkiestratora
     orchestrator_system_prompt = get_orchestrator_prompt()
 
+    # Przygotowanie kontekstu wiadomości
     messages = [
         SystemMessage(content=orchestrator_system_prompt.content),
         HumanMessage(content=state["messages"][-1].content),
     ]
 
+    # Wywołanie LLM
     result = structured_llm.invoke(messages)
+
+    # Scalanie filtrów z config i wiadomości użytkownika
+    config_filters = config.get("configurable", {}).get("filters")
+    message_filters = result.filters
+    filters = merge_filters(message_filters=message_filters, config_filters=config_filters)
+
+    # Logowanie wyników do konsoli
     print(f"📝 Intent: {result.message_intent}")
     if result.filters:
-        print(f"🔍 Filtry: {result.filters}")
-    print(f"🎯 Active game: {result.active_game}")
+        print(f"🔍 Filtry: {filters}")
+    if result.references:
+        print(f"🔍 Referencyjne gry: {result.references}")
 
     return {
         "message_intent": result.message_intent,
-        "filters": result.filters.model_dump() if result.filters else {},
-        "active_game": (
-            result.active_game if result.active_game else state.get("active_game")
-        ),
+        "filters": filters,
+        "references": result.references
     }
 
 
@@ -65,9 +77,11 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
    Przykłady: "Powiedz mi wszystko o Cyberpunk 2077", "Jaka jest cena Witcher 3?", "Opowiedz mi o grze GTA V"
 
 # ZASADY EKSTRAKCJI DANYCH (EXTRACTION RULES)
-- Dla intencji "game_info": Wyodrębnij nazwę docelowej gry do pola `active_game`.
-- Dla intencji "recommendation": Wyodrębnij grę odniesienia (jeśli została wspomniana) do pola `active_game` oraz wszelkie filtry.
-- Dla intencji "semantic_search": Wyodrębnij filtry (gatunki, platformy, max_price itp.).
+- Dla intencji "game_info": Wyodrębnij nazwę docelowej gry/gier do pola `references`.
+- Dla intencji "recommendation": 
+Wyodrębnij wszystkie gry, do których odnosi się użytkownik w zapytaniu i zapisz je jako listę w polu `references`. Jeśli użytkownik nie podał żadnej gry, zwróć pustą listę `[]`.
+Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
+- Dla intencji "semantic_search": Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
 
 Przykłady:
 Użytkownik: "Poleć gry podobne do Elden Ring tańsze niż 200 PLN"

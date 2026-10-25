@@ -9,9 +9,8 @@ class AgentState(TypedDict):
     messages: Annotated[list, add_messages]
     message_intent: str | None
 
-    active_game: str | None
     filters: GameFilter | None
-    references: str | None
+    references: list[str] | None
 
     results: list[dict[str, Any]]
     games: list[dict[str, Any]]
@@ -22,5 +21,5 @@ class IntentClassifier(BaseModel):
         ...,
         description="Classify whether the user wants recommendation, semantic_search, or game_info.",
     )
-    active_game: str | None = None
+    references: list[str] | None
     filters: GameFilter = Field(default_factory=GameFilter)

@@ -357,12 +357,20 @@ def toggle_hide_game(app_id: int = Body(embed=False), user_session: UserSession 
 @app.post("/api/message")
 async def get_message(
     data: dict,
-    session: UserSession = Depends(authenticate_session),
+    user_session: UserSession = Depends(authenticate_session),
     db: Session = Depends(get_db),
 ):
     user_message = data.get("question", "")
+    filters = data.get("filters", {})
 
-    config = {"configurable": {"thread_id": str(session.user_id)}}
+    config = {
+        "configurable": {
+            "thread_id": str(user_session.user_id),
+            "user_id": user_session.user_id,
+            "filters": filters
+        }
+    }
+
     inputs = {"messages": [HumanMessage(content=user_message)]}
 
     result = await chatbot_app.ainvoke(inputs, config=config)

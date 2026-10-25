@@ -1,7 +1,9 @@
-from langchain_core.tools import tool
-import requests
+from typing import Any
+from rapidfuzz import process, fuzz
 
-from database.models import SteamGames, Genres, Languages, Tags, Platforms
+from database.models import SteamGames, Genres, Languages, Tags, Platforms, UserGameLibrary
+from database.database import get_db
+from schemas.schemas import GameFilter
 
 
 def apply_filters(query, filters: dict):
@@ -9,7 +11,15 @@ def apply_filters(query, filters: dict):
     if not filters:
         return query
 
-    for filter_name, value in filters.items():
+    # Jeśli podano obiekt Pydantic, przekształć go na słownik
+    if isinstance(filters, GameFilter):
+        filters_dict = filters.model_dump(exclude_none=True)
+    elif isinstance(filters, dict):
+        filters_dict = {k: v for k, v in filters.items() if v is not None}
+    else:
+        return query
+
+    for filter_name, value in filters_dict.items():
         if value is None or value == "" or value == []:
             continue
 
@@ -31,9 +41,9 @@ def apply_filters(query, filters: dict):
 
         # Filtry dat
         elif filter_name == "release_date_min_year":
-            query = query.filter(SteamGames.release_date >= value)
+            query = query.filter(SteamGames.release_date >= f"{value}-01-01")
         elif filter_name == "release_date_max_year":
-            query = query.filter(SteamGames.release_date <= value)
+            query = query.filter(SteamGames.release_date <= f"{value}-12-31")
 
         # Filtry gatunków
         elif filter_name == "genres":
@@ -58,41 +68,111 @@ def apply_filters(query, filters: dict):
     return query
 
 
-@tool
-def currency_converter_to_PLN(amount, from_currency):
-    """
-    Converts an amount from one currency to PLN using a fixed exchange rate.
-    
-    Args:
-        amount (float): The amount of money to convert.
-        from_currency (str): The currency code of the original currency (e.g., 'USD').
-    """
+FUZZY_SCORE_THRESHOLD = 70.0
 
-    from_currency = from_currency.upper()
-    url = "https://api.nbp.pl/api/exchangerates/tables/A/?format=json"
+def search_game_id(game_name: str) -> dict[str, Any]:
+    """Wyszukuje ID (appid) oraz dokładną nazwę gry w bazie danych."""
+    clean_name = (game_name or "").strip()
+    if not clean_name:
+        return {"status": "error", "message": "Pusta nazwa gry", "appid": None}
 
+    db = next(get_db())
     try:
-        response = requests.get(url)
-        response.raise_for_status() 
+        # Szukamy dokładnego lub częściowego dopasowania w bazie
+        match = (
+            db.query(SteamGames.appid, SteamGames.name)
+            .filter(SteamGames.name.ilike(f"%{clean_name}%"))
+            .first()
+        )
+        if match:
+            print(
+                f"🎯 SQL Match: '{clean_name}' -> '{match.name}' (appid: {match.appid})"
+            )
+            return {
+                "status": "success",
+                "appid": match.appid,
+                "matched_name": match.name,
+                "searched_query": clean_name,
+            }
 
-        data = response.json()
+        # Rezerwowe dopasowanie rozmyte (RapidFuzz)
+        games_dict = dict(
+            db.query(SteamGames.name, SteamGames.appid)
+            .filter(SteamGames.name.isnot(None))
+            .all()
+        )
 
-        exchange_rate = None
-        for rate in data[0]['rates']:
-            if rate['code'] == from_currency:
-                exchange_rate = rate['mid']
-                break
+        if not games_dict:
+            return {
+                "status": "not_found",
+                "message": "Baza gier jest pusta",
+                "appid": None,
+            }
 
-        if exchange_rate is None:
-            print(f"Nie znaleziono kursu wymiany dla waluty: {from_currency}")
-            return None
+        fuzzy_match = process.extractOne(
+            clean_name, choices=games_dict.keys(), scorer=fuzz.WRatio
+        )
 
-        # Convert the amount
-        converted_amount = amount * exchange_rate
-        print(f"{amount} {from_currency} = {converted_amount:.2f} PLN")
+        if fuzzy_match and fuzzy_match[1] >= FUZZY_SCORE_THRESHOLD:
+            best_title, score = fuzzy_match[0], fuzzy_match[1]
+            ref_id = games_dict[best_title]
+            print(
+                f"🎯 RapidFuzz Match: '{clean_name}' -> '{best_title}' (appid: {ref_id}, match: {score:.1f}%)"
+            )
+            return {
+                "status": "success",
+                "appid": ref_id,
+                "matched_name": best_title,
+                "searched_query": clean_name,
+            }
 
-        return converted_amount
+        print(f"⚠️ Brak lub słabe dopasowanie dla '{clean_name}'")
+        return {
+            "status": "not_found",
+            "message": f"Nie znaleziono gry: {clean_name}",
+            "appid": None,
+            "searched_query": clean_name,
+        }
 
-    except requests.RequestException as e:
-        print(f"Błąd podczas pobierania kursu wymiany: {e}")
-        return None
+    except Exception as e:
+        print(f"❌ Błąd w search_game_id: {e}")
+        return {"status": "error", "message": str(e), "appid": None}
+    finally:
+        db.close()
+
+
+def get_user_library(user_id: int):
+    if user_id is None:
+        return []
+
+    db = next(get_db())
+
+    library_games = (
+        db.query(UserGameLibrary.appid)
+        .filter(UserGameLibrary.user_id == user_id)
+        .all()
+    )
+
+    return [appid for (appid,) in library_games]
+
+
+def merge_filters(
+    message_filters: GameFilter | dict | None,
+    config_filters: GameFilter | dict | None,
+) -> GameFilter:
+    # Standaryzacja do instancji GameFilter
+    msg_filters = (
+        message_filters
+        if isinstance(message_filters, GameFilter)
+        else GameFilter(**(message_filters or {}))
+    )
+    cfg_filters = (
+        config_filters
+        if isinstance(config_filters, GameFilter)
+        else GameFilter(**(config_filters or {}))
+    )
+
+    # Pobranie filtrów z wiadomości i nadpisanie ich filtrami z config
+    merged_filters = cfg_filters.model_dump(exclude_none=True) | msg_filters.model_dump(exclude_none=True)
+
+    return GameFilter(**merged_filters)
