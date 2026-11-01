@@ -78,24 +78,7 @@ def search_game_id(game_name: str) -> dict[str, Any]:
 
     db = next(get_db())
     try:
-        # Szukamy dokładnego lub częściowego dopasowania w bazie
-        match = (
-            db.query(SteamGames.appid, SteamGames.name)
-            .filter(SteamGames.name.ilike(f"%{clean_name}%"))
-            .first()
-        )
-        if match:
-            print(
-                f"🎯 SQL Match: '{clean_name}' -> '{match.name}' (appid: {match.appid})"
-            )
-            return {
-                "status": "success",
-                "appid": match.appid,
-                "matched_name": match.name,
-                "searched_query": clean_name,
-            }
-
-        # Rezerwowe dopasowanie rozmyte (RapidFuzz)
+        # Dopasowanie rozmyte (RapidFuzz)
         games_dict = dict(
             db.query(SteamGames.name, SteamGames.appid)
             .filter(SteamGames.name.isnot(None))

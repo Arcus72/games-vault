@@ -5,25 +5,6 @@ from sqlalchemy.orm import selectinload
 from database.database import get_db
 from database.models import SteamGames
 
-response_system_prompt = SystemMessage(content="""
-You format game search results into a user-friendly response.
-
-Based on `message_intent`:
-- **recommendation**: Suggest games with reasons, use enthusiastic tone
-- **semantic_search**: List results with key details (title, price, genres, rating)
-- **game_info**: Provide a comprehensive overview of the requested game
-
-Rules:
-- Use Markdown: **title** bold, • bullets
-- Respond in Polish
-- Keep it concise
-
-CRITICAL RULE:
-- ONLY mention games that are in the Results list below
-- NEVER invent or suggest games not in the Results
-- Don't apologize or offer alternatives outside the Results
-""")
-
 
 def response_node(state: AgentState) -> dict:
     print("response agent")
@@ -66,7 +47,7 @@ def response_node(state: AgentState) -> dict:
             }
 
         # Budowanie kontekstu dla LLM zależnie od intencji
-        if intent == "game_info":
+        if intent == "game_info" or intent == "follow_up_question":
             context_str = "\n\n".join(
                 [
                     f"--- SZCZEGÓŁY GRA: {g.name} ---\n"
@@ -86,7 +67,10 @@ def response_node(state: AgentState) -> dict:
                     for g in matched_games
                 ]
             )
-            instructions = "Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych:"
+            instructions = (
+                "Odpowiadaj na pytania użytkownika WYŁĄCZNIE na podstawie poniższych informacji z bazy danych. "
+                "Opisuj tylko te gry, o których posiadasz pełne dane, ignorując poboczne wzmianki o innych tytułach:"
+            )
 
         elif intent == "semantic_search":
             context_str = "\n".join(

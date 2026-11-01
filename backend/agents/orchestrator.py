@@ -17,10 +17,7 @@ def orchestrator_node(state: AgentState, config: RunnableConfig):
     orchestrator_system_prompt = get_orchestrator_prompt()
 
     # Przygotowanie kontekstu wiadomości
-    messages = [
-        SystemMessage(content=orchestrator_system_prompt.content),
-        HumanMessage(content=state["messages"][-1].content),
-    ]
+    messages = [SystemMessage(content=orchestrator_system_prompt.content)] + state["messages"][-5:]
 
     # Wywołanie LLM
     result = structured_llm.invoke(messages)
@@ -74,7 +71,10 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
    Przykłady: "Gra survivalowa z tworzeniem przedmiotów", "Gra, w której buduje się zamek"
 
 3. "game_info" – Użytkownik pyta o szczegółowe informacje, opisy lub dane dotyczące jednej konkretnej gry.
-   Przykłady: "Powiedz mi wszystko o Cyberpunk 2077", "Jaka jest cena Witcher 3?", "Opowiedz mi o grze GTA V"
+   Przykłady: "Powiedz mi wszystko o Cyberpunk 2077", "Jaka jest cena Witcher 3?", "Opowiedz mi o grze GTA V", "Porównaj mi grę Cyberpunk 2077 z GTA V"
+
+4. "follow_up_question" – Użytkownik dopytuje o gry, które zostały mu przed chwilą zwrócone przez system w poprzedniej odpowiedzi.
+   Przykłady: "Opisz mi bardziej tą grę", "Opowiedz coś więcej o 2 ostatnich grach z tej listy", "Porównaj mi te gry z grą GTA V"
 
 # ZASADY EKSTRAKCJI DANYCH (EXTRACTION RULES)
 - Dla intencji "game_info": Wyodrębnij nazwę docelowej gry/gier do pola `references`.
@@ -82,6 +82,11 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
 Wyodrębnij wszystkie gry, do których odnosi się użytkownik w zapytaniu i zapisz je jako listę w polu `references`. Jeśli użytkownik nie podał żadnej gry, zwróć pustą listę `[]`.
 Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
 - Dla intencji "semantic_search": Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
+
+- Dla intencji "follow_up_question"
+W polu `references` umieść DOKŁADNE NAZWY gier z historii, o które pyta użytkownik.
+Jeśli użytkownik pyta ogólnie (np. "Opisz mi te gry"), umieść w `references` wszystkie nazwy zarekomendowanych gier.
+Jeśli pyta o wybrane pozycje (np. "Porównaj trzecią grę i Cyberpunka", "Opisz bardziej drugą grę"), umieść w `references` TYLKO te konkretne tytuły.
 
 Przykłady:
 Użytkownik: "Poleć gry podobne do Elden Ring tańsze niż 200 PLN"
