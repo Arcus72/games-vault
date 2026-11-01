@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+import secrets
 import uuid
 import hashlib
 import base64
@@ -7,8 +9,8 @@ from sqlalchemy import and_, func, nulls_last
 from sqlalchemy.orm import Session
 from database.database import get_db
 from auth.user_auth import authenticate_session, create_new_session, authenticate_user, attach_user_to_session
-from database.functions import gen_password_hash, get_filtered_steam_games, get_searched_games, filter_user_library, GamesPagination, GET_STEAM64, get_steam_library_games_list
-from database.models import Users, UserSession, SteamGames, SteamLanguages, SteamGenres, SteamTags, SteamPlatforms, UserGameLibrary, Tags, Platforms, Genres, Languages
+from database.functions import gen_password_hash, get_filtered_steam_games, get_searched_games, filter_user_library, GamesPagination, GET_STEAM64, get_steam_library_games_list, send_activation_email
+from database.models import UserActivationTokens, Users, UserSession, SteamGames, SteamLanguages, SteamGenres, SteamTags, SteamPlatforms, UserGameLibrary, Tags, Platforms, Genres, Languages
 from fastapi.middleware.cors import CORSMiddleware
 from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, UserPasswordChange, SteamIdUpdate 
 from graph import chatbot_app
@@ -68,12 +70,51 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
         raise HTTPException(status_code=400, detail="Użytkownik o podanej nazwie użytkownika lub adresie e-mail już istnieje.")
 
     password_hash = gen_password_hash(password)
-    new_user = Users(username=username, email=email, password_hash=password_hash, active=1)
+    new_user = Users(
+        username=username, 
+        email=email, 
+        password_hash=password_hash, 
+        active=0
+    )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
 
+    token = secrets.token_urlsafe(32)
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    new_activation_token = UserActivationTokens(
+        user_id=new_user.id, 
+        token=token_hash,
+        created_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1)
+    )
+    db.add(new_activation_token)
+    db.commit()
+    db.refresh(new_activation_token)
+    status = send_activation_email(new_user.email, token)
+    if status.get("status") != "200":
+        raise HTTPException(status_code=500, detail=status.get("message", "Wystąpił błąd podczas wysyłania emaila aktywacyjnego."))
     return {"message": "Użytkownik utworzony pomyślnie. Teraz możesz się zalogować.", "user_id": new_user.id}
+
+@app.get("/api/activate_user/{token}")
+async def activate_user(token: str, db: Session = Depends(get_db)):
+    token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    activation_token = db.query(UserActivationTokens).filter(UserActivationTokens.token == token_hash).first()
+    if not activation_token:
+        raise HTTPException(status_code=404, detail="Token aktywacyjny nie został znaleziony.")
+
+    if activation_token.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Token aktywacyjny wygasł.")
+
+    user = db.query(Users).filter(Users.id == activation_token.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Użytkownik nie został znaleziony.")
+
+    user.active = 1
+    db.delete(activation_token)
+    db.commit()
+
+    return {"message": "Konto zostało aktywowane pomyślnie."}
 
 @app.post("/api/login")
 async def login(request: Request, response: Response, data: UserLogin, db: Session = Depends(get_db), session: UserSession = Depends(authenticate_session)):
@@ -88,7 +129,7 @@ async def login(request: Request, response: Response, data: UserLogin, db: Sessi
     if not user:
         raise HTTPException(status_code=401, detail="Błędny mail lub hasło.")
     elif not user.active:
-        raise HTTPException(status_code=403, detail="Konto jest nieaktywne.")
+        raise HTTPException(status_code=403, detail="Konto jest nieaktywne. Należy je aktywować poprzez kliknięcie w link aktywacyjny wysłany na adres e-mail.")
     elif not checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
         raise HTTPException(status_code=401, detail="Błędny mail lub hasło.")
     

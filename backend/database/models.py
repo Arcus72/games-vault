@@ -24,6 +24,16 @@ class Users(Base):
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     active: Mapped[int] = mapped_column(Integer, default=0)
 
+class UserActivationTokens(Base):
+    __tablename__ = "tbl_UserActivationTokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_Users.id"), index=True, nullable=False)
+    token: Mapped[str] = mapped_column(String, unique=True, index=True)
+    created_at: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=False)
+    expires_at: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=False)
+
+    user: Mapped["Users"] = relationship()
 
 class SteamGames(Base):
     __tablename__ = "tbl_SteamGames"

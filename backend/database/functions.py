@@ -1,10 +1,13 @@
 import requests
+import smtplib
 from bcrypt import gensalt, hashpw
 from sqlalchemy import func, Integer, nulls_last
 from sqlalchemy.orm import Session
 from config.settings import Settings, get_settings
 from database.models import SteamGames, Genres, Platforms, Languages, Tags, UserGameLibrary
 from schemas.schemas import GameFilter, UserLibraryFilters
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 def gen_password_hash(password: str) -> str:
     salt = gensalt()
@@ -89,6 +92,27 @@ def get_steam_library_games_list(steam_id64: str, settings: Settings = get_setti
             games_id.append(game['appid'])
             
     return games_id
+
+def send_activation_email(email: str, token: str, settings: Settings = get_settings()):
+
+    activation_link = f"http://localhost:8000/activate?token={token}"
+    subject = "Aktywacja konta w Games Vault"
+    body = f"Witaj,\n\nDziękujemy za rejestrację w Games Vault! Aby aktywować swoje konto, kliknij w poniższy link:\n\n{activation_link}\n\nLink jest ważny przez 24 godziny.\n\nPozdrawiamy,\nZespół Games Vault"
+
+    msg = MIMEMultipart()
+    msg['From'] = settings.SMTP_USER
+    msg['To'] = email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
+
+    try:
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+            server.send_message(msg)
+            return {"status": "200", "message": "Email aktywacyjny został wysłany."}
+    except Exception as e:
+        return {"status": "500", "message": str(e)}
 
     
 

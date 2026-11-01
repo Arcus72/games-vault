@@ -8,7 +8,8 @@ class Settings(BaseSettings):
     GEMINI_API: str
     MODEL_NAME: str
     HF_TOKEN: str
-
+    SMTP_USER: str
+    SMTP_PASSWORD: str
     class Config:
         env_file = ".env"
 
