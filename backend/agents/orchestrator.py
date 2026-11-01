@@ -76,6 +76,8 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
 4. "follow_up_question" – Użytkownik dopytuje o gry, które zostały mu przed chwilą zwrócone przez system w poprzedniej odpowiedzi.
    Przykłady: "Opisz mi bardziej tą grę", "Opowiedz coś więcej o 2 ostatnich grach z tej listy", "Porównaj mi te gry z grą GTA V"
 
+5. "out_of_scope": Pytanie NIE dotyczy gier wideo lub jest bezsensowym ciągiem znaków.
+
 # ZASADY EKSTRAKCJI DANYCH (EXTRACTION RULES)
 - Dla intencji "game_info": Wyodrębnij nazwę docelowej gry/gier do pola `references`.
 - Dla intencji "recommendation": 

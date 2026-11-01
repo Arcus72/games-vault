@@ -29,7 +29,8 @@ def build_app():
             'recommendation': 'recommendation_agent',
             'semantic_search': 'semantic_search_agent',
             'game_info': 'info_agent',
-            'follow_up_question': 'info_agent'
+            'follow_up_question': 'info_agent',
+            'out_of_scope': 'response_agent'
         }
     )
 

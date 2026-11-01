@@ -11,13 +11,21 @@ def response_node(state: AgentState) -> dict:
     intent = state.get("message_intent")
     results = state.get("results", [])
 
-    # Jeśli brak wyników dla wyszukiwania i rekomendacji
-    if intent in ("semantic_search", "recommendation") and not results:
+    if intent == "out_of_scope":
         msg = (
-            "Niestety nie znalazłem żadnych gier pasujących do Twojego zapytania."
-            if intent == "semantic_search"
-            else "Niestety nie znalazłem żadnych rekomendacji gier dopasowanych do Twojego profilu i filtrów."
+            "Jestem asystentem wyspecjalizowanym wyłącznie w grach wideo i platformie Steam. "
+            "Pomagam w znajdowaniu gier, sprawdzaniu cen i rekomendacjach! "
+            "W czym związanym z grami mogę Ci dzisiaj pomóc?"
         )
+        return {
+            "messages": [AIMessage(content=[{"type": "text", "text": msg}])],
+            "games": []
+        }
+
+    # Jeśli brak wyników dla wyszukiwania i rekomendacji
+    if not results:
+        msg = "Niestety nie znalazłem żadnych gier pasujących do Twojego zapytania."
+        
         return {
             "messages": [AIMessage(content=[{"type": "text", "text": msg}])],
             "games": [],

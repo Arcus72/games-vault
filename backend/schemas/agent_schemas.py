@@ -17,9 +17,9 @@ class AgentState(TypedDict):
 
 
 class IntentClassifier(BaseModel):
-    message_intent: Literal["recommendation", "semantic_search", "game_info", "follow_up_question"] = Field(
+    message_intent: Literal["recommendation", "semantic_search", "game_info", "follow_up_question", "out_of_scope"] = Field(
         ...,
-        description="Classify whether the user wants recommendation, semantic_search, game_info or follow_up_question",
+        description="Classify whether the user wants recommendation, semantic_search, game_info, follow_up_question or out_of_scope",
     )
     references: list[str] | None
     filters: GameFilter = Field(default_factory=GameFilter)
