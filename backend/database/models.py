@@ -1,7 +1,14 @@
-from sqlalchemy import Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Integer, String, Float, ForeignKey, DateTime, Date, func, case
+from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from pgvector.sqlalchemy import Vector
 from database.database import Base
+from datetime import date
+import math
+
+metacritic_default = 30
+metacritic_score_wage = 0.15
+recommendations_wage = 0.75
+release_date_wage = 0.10
 
 class UserSession(Base):
     __tablename__ = "tbl_UserSessions"
@@ -44,7 +51,8 @@ class SteamGames(Base):
     about_the_game: Mapped[str] = mapped_column(String, index=False, nullable=True)
     publisher: Mapped[str] = mapped_column(String, index=True, nullable=True)
     developer: Mapped[str] = mapped_column(String, index=True, nullable=True)
-    release_date: Mapped[str] = mapped_column(String, index=True, nullable=True)
+    release_date: Mapped[date] = mapped_column(Date, index=True, nullable=True)
+    is_released: Mapped[int] = mapped_column(Integer, index=True, nullable=True, server_default='1')
     price: Mapped[float] = mapped_column(Float, index=True, nullable=True)
     website: Mapped[str] = mapped_column(String, index=False, nullable=True)
     pc_requirements: Mapped[str] = mapped_column(String, index=False, nullable=True)
@@ -71,6 +79,15 @@ class SteamGames(Base):
         secondary="tbl_SteamTags"
     )
 
+    popularity = column_property(
+    (
+        recommendations_wage * (100 * func.power(func.ln(1 + func.greatest(0, func.coalesce(recommendations, 0)))/ func.ln(1_000_001), 0.85))
+        +
+        release_date_wage * (100 * func.exp(-case((release_date.is_(None), 0), else_=func.greatest(0,func.current_date() - release_date)) / 2190.0))
+        +
+        metacritic_score_wage * func.coalesce(metacritic_score, metacritic_default) 
+    )
+    )
 
 class SteamGenres(Base):
     __tablename__ = "tbl_SteamGenres"
@@ -123,13 +140,6 @@ class Platforms(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     platform: Mapped[str] = mapped_column(String, index=True, nullable=False, unique=True)
-
-class SteamScreenshots(Base):
-    __tablename__ = "tbl_SteamScreenshots"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    appid: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_SteamGames.appid"), index=True, nullable=False)
-    screenshot_url: Mapped[str] = mapped_column(String, index=False, nullable=False)
 
 class UserGameLibrary(Base):
     __tablename__ = "tbl_UserGameLibrary"

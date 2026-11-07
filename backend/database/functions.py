@@ -1,13 +1,14 @@
 import requests
 import smtplib
 from bcrypt import gensalt, hashpw
-from sqlalchemy import func, Integer, nulls_last
+from sqlalchemy import func, Integer, nulls_last, extract
 from sqlalchemy.orm import Session
 from config.settings import Settings, get_settings
 from database.models import SteamGames, Genres, Platforms, Languages, Tags, UserGameLibrary
 from schemas.schemas import GameFilter, UserLibraryFilters
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime, timezone
 
 def gen_password_hash(password: str) -> str:
     salt = gensalt()
@@ -19,12 +20,12 @@ def get_filtered_steam_games(db: Session, filters: GameFilter):
 
     if filters.name is not None:
         query = query.filter(func.lower(SteamGames.name).contains(func.lower(filters.name)))
+    if filters.IsReleased is not None:
+        query = query.filter(SteamGames.is_released == (1 if filters.IsReleased else 0))
     if filters.release_date_min_year is not None:
-        rok = func.split_part(SteamGames.release_date, " ", 3).cast(Integer)
-        query = query.filter(rok >= filters.release_date_min_year)
+        query = query.filter(extract('year', SteamGames.release_date) >= filters.release_date_min_year)
     if filters.release_date_max_year is not None:
-        rok = func.split_part(SteamGames.release_date, " ", 3).cast(Integer)
-        query = query.filter(rok <= filters.release_date_max_year)
+        query = query.filter(extract('year', SteamGames.release_date) <= filters.release_date_max_year)
     if filters.price_max is not None:
         query = query.filter(SteamGames.price <= filters.price_max)
     if filters.genres is not None:
@@ -36,12 +37,16 @@ def get_filtered_steam_games(db: Session, filters: GameFilter):
     if filters.tags is not None:
         query = query.join(SteamGames.tags).filter(Tags.tag.in_(filters.tags))
     if filters.sorting is not None:
-        if filters.sorting.sort_by is not None and filters.sorting.sort_by in SteamGames.__table__.columns.keys():
+        if filters.sorting.sort_by is not None and filters.sorting.sort_by in SteamGames.__mapper__.attrs.keys():
             sort_column = getattr(SteamGames, filters.sorting.sort_by)
             if filters.sorting.ascending == 1:
                 query = query.order_by(nulls_last(sort_column.asc()))
             else:
                 query = query.order_by(nulls_last(sort_column.desc()))
+        else:
+            query = query.order_by(nulls_last(SteamGames.popularity.asc()))
+    else:
+        query = query.order_by(nulls_last(SteamGames.popularity.asc()))
     return query.distinct()
 
 def get_searched_games(db: Session, search_query: str):

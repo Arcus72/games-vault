@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 from pydantic import BaseModel, ConfigDict
 
 class UserCreate(BaseModel):
@@ -44,7 +44,7 @@ class GameRespone(BaseModel):
     appid: int
     name: str
     price: float
-    release_date: str | None
+    release_date: date | None
     header_image: str
     status: int | None   # 0 -> Brak 1 -> Wishlist 2 -> Library 3 -> Library_Hidden
     FromSteam: int | None
