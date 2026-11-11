@@ -1,4 +1,5 @@
 from typing import Any
+from datetime import date
 from rapidfuzz import process, fuzz
 
 from database.models import SteamGames, Genres, Languages, Tags, Platforms, UserGameLibrary
@@ -41,9 +42,9 @@ def apply_filters(query, filters: dict):
 
         # Filtry dat
         elif filter_name == "release_date_min_year":
-            query = query.filter(SteamGames.release_date >= f"{value}-01-01")
+            query = query.filter(SteamGames.release_date >= date(int(value), 1, 1))
         elif filter_name == "release_date_max_year":
-            query = query.filter(SteamGames.release_date <= f"{value}-12-31")
+            query = query.filter(SteamGames.release_date <= date(int(value), 12, 31))
 
         # Filtry gatunków
         elif filter_name == "genres":

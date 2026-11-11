@@ -61,7 +61,7 @@ class SteamGames(Base):
     header_image_url: Mapped[str] = mapped_column(String, index=False, nullable=False)
     capsule_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
     background_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
-    embedding: Mapped[list[float]] = mapped_column(Vector(1536), nullable=True)
+    embedding: Mapped[list[float]] = mapped_column(Vector(1024), nullable=True)
 
     genres: Mapped[list["Genres"]] = relationship(
         secondary="tbl_SteamGenres"
