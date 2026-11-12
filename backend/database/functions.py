@@ -83,7 +83,6 @@ def get_steam_library_games_list(steam_id64: str, settings: Settings = get_setti
         "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={}&steamid={}&include_appinfo=false&include_played_free_games=1&format=json"
     ).format(settings.STEAM_API_KEY, steam_id64)
 
-    games_id = []
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
@@ -91,12 +90,13 @@ def get_steam_library_games_list(steam_id64: str, settings: Settings = get_setti
 
     if not games:
         raise ValueError("Nie znaleziono gier w bibliotece Steam dla podanego uzytkownika.")
-    
+
+    games_list = {}
     for game in games:
         if game['playtime_forever'] > 0:
-            games_id.append(game['appid'])
-            
-    return games_id
+            games_list[game['appid']] = game['playtime_forever']
+
+    return games_list
 
 def send_activation_email(email: str, token: str, settings: Settings = get_settings()):
 
@@ -118,6 +118,3 @@ def send_activation_email(email: str, token: str, settings: Settings = get_setti
             return {"status": "200", "message": "Email aktywacyjny został wysłany."}
     except Exception as e:
         return {"status": "500", "message": str(e)}
-
-    
-

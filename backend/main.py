@@ -332,24 +332,26 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
         steam_id64 = GET_STEAM64(user.steam_id)
         games_list = get_steam_library_games_list(steam_id64)
 
-        query = db.query(SteamGames).filter(SteamGames.appid.in_(games_list)).all()
+        query = db.query(SteamGames).filter(SteamGames.appid.in_(games_list.keys())).all()
         GamesID = [game.appid for game in query]
 
-        query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 0).all()
-        GamesID_Update = [game.appid for game in query_update]
+        query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).all()
 
-        games_already_in_library = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 1).all()
-        ganes_already_in_library_ids = [game.appid for game in games_already_in_library]
+        for game in query_update:
+            game.FromSteam = 1
+            game.playtime_forever = games_list[game.appid]
 
-        db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID_Update)).update({"FromSteam": 1})
-        db.commit()
-
-        GamesID_Insert = list(set(GamesID) - set(GamesID_Update) - set(ganes_already_in_library_ids))
+        GamesID_Insert = list(set(GamesID) - {game.appid for game in query_update})
 
         objects_to_insert = [
             UserGameLibrary(
-                user_id=user_id, appid=appid, status=2, FromSteam=1
-            ) for appid in GamesID_Insert
+                user_id=user_id,
+                appid=appid,
+                status=2,
+                FromSteam=1,
+                playtime_forever=games_list[appid],
+            )
+            for appid in GamesID_Insert
         ]
 
         db.bulk_save_objects(objects_to_insert)

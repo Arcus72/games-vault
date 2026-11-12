@@ -149,6 +149,7 @@ class UserGameLibrary(Base):
     appid: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_SteamGames.appid"), index=True, nullable=False)
     status: Mapped[int] = mapped_column(Integer, index=True, nullable=False)    # 1 -> Wishlist 2 -> Library 3 -> Library_Hidden
     FromSteam: Mapped[int] = mapped_column(Integer, index=True, nullable=False, default=0) # 0 -> Nie z Steam, 1 -> Z Steam
+    playtime_forever: Mapped[int] = mapped_column(Integer, index=True, nullable=True, default=0) # Czas gry w minutach
 
 class UserComments(Base):
     __tablename__ = "tbl_UserComments"
