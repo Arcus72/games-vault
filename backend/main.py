@@ -96,7 +96,7 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
         raise HTTPException(status_code=500, detail=status.get("message", "Wystąpił błąd podczas wysyłania emaila aktywacyjnego."))
     return {"message": "Użytkownik utworzony pomyślnie. Teraz możesz się zalogować.", "user_id": new_user.id}
 
-@app.get("/api/activate_user/{token}")
+@app.post("/api/activate_user/{token}")
 async def activate_user(token: str, db: Session = Depends(get_db)):
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
     activation_token = db.query(UserActivationTokens).filter(UserActivationTokens.token == token_hash).first()
@@ -338,10 +338,13 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
         query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 0).all()
         GamesID_Update = [game.appid for game in query_update]
 
+        games_already_in_library = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 1).all()
+        ganes_already_in_library_ids = [game.appid for game in games_already_in_library]
+
         db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID_Update)).update({"FromSteam": 1})
         db.commit()
 
-        GamesID_Insert = list(set(GamesID) - set(GamesID_Update))
+        GamesID_Insert = list(set(GamesID) - set(GamesID_Update) - set(ganes_already_in_library_ids))
 
         objects_to_insert = [
             UserGameLibrary(
