@@ -1,109 +1,143 @@
 import numpy as np
 from langchain_core.runnables import RunnableConfig
+from sqlalchemy.orm import Session
 
 from database.database import get_db
 from database.models import SteamGames
 from schemas.agent_schemas import AgentState
 from agents.tools import apply_filters, search_game_id, get_user_library
+from model_loader import get_als_recommendations
 
 
-REFERENCES_SCORE = 0.7
-LIBRARY_SCORE = 0.3
+def resolve_reference_ids(references: list) -> list[int]:
+    """Zamienia nazwy gier referencyjnych na listę poprawnych Steam appid."""
+    ref_ids = []
+
+    for ref in references or []:
+        if isinstance(ref, str) and ref.strip():
+            game = search_game_id(ref)
+            if game.get("status") == "success" and game.get("appid") is not None:
+                ref_ids.append(int(game["appid"]))
+    return list(dict.fromkeys(ref_ids))
+
+
+def build_user_profile(
+    db: Session,
+    references_ids: list[int],
+    library_ids: list[int],
+    ref_weight: float = 0.7,
+) -> np.ndarray | None:
+    """
+    Pobiera embeddingi jednym zapytaniem SQL i buduje znormalizowany wektor profilu użytkownika.
+    Zwraca None, jeśli brak jakichkolwiek embeddingów.
+    """
+    all_ids = set(references_ids) | set(library_ids)
+    if not all_ids:
+        return None
+
+    rows = (
+        db.query(SteamGames.appid, SteamGames.embedding)
+        .filter(SteamGames.appid.in_(all_ids), SteamGames.embedding.isnot(None))
+        .all()
+    )
+    emb_map = {r.appid: np.asarray(r.embedding, dtype=np.float32) for r in rows}
+
+    ref_embs = [emb_map[aid] for aid in references_ids if aid in emb_map]
+    lib_embs = [emb_map[aid] for aid in library_ids if aid in emb_map]
+
+    ref_profile = np.mean(ref_embs, axis=0) if ref_embs else None
+    lib_profile = np.mean(lib_embs, axis=0) if lib_embs else None
+
+    if ref_profile is not None and lib_profile is not None:
+        profile = ref_weight * ref_profile + (1.0 - ref_weight) * lib_profile
+    elif ref_profile is not None:
+        profile = ref_profile
+    elif lib_profile is not None:
+        profile = lib_profile
+    else:
+        return None
+
+    norm = np.linalg.norm(profile)
+    return (profile / norm) if norm > 0 else None
+
+
+def get_popular_fallback(db: Session, filters: dict, excluded_ids: set[int], limit: int = 5) -> list[int]:
+    """Zwraca najpopularniejsze gry, respektując filtry i wykluczenia."""
+    print("ℹBrak biblioteki i referencji — zwracam najpopularniejsze gry.")
+    query = db.query(SteamGames.appid, SteamGames.name, SteamGames.popularity)
+
+    if excluded_ids:
+        query = query.filter(~SteamGames.appid.in_(excluded_ids))
+
+    query = apply_filters(query, filters)
+    games = (
+        query.filter(SteamGames.popularity.isnot(None))
+        .order_by(SteamGames.popularity.desc())
+        .limit(limit)
+        .all()
+    )
+
+    for g in games:
+        print(f"🔥 Popularna gra: {g.name} (appid: {g.appid}, popularity: {g.popularity})")
+    return [g.appid for g in games]
+
+
+def rank_hybrid_candidates(candidate_games: list, user_id: int | None, top_n: int = 5) -> list[int]:
+    """Łączy wynik Content-Based (distance) z Collaborative Filtering (ALS) i zwraca TOP N."""
+    cf_scores_map = get_als_recommendations(user_id, N=1000) if user_id is not None else {}
+    alpha = 0.6 if cf_scores_map else 1.0
+
+    scored = []
+    for game in candidate_games:
+        content_score = max(0.0, 1.0 - float(game.distance))
+        cf_score = cf_scores_map.get(game.appid, 0.0)
+        hybrid_score = alpha * content_score + (1.0 - alpha) * cf_score
+        scored.append((game.appid, game.name, hybrid_score, content_score, cf_score))
+
+    scored.sort(key=lambda x: x[2], reverse=True)
+    top_games = scored[:top_n]
+
+    for appid, name, h_score, c_score, cf_s in top_games:
+        print(
+            f"🎯 Znaleziono: {name} (appid: {appid}) | "
+            f"Hybrid: {h_score:.3f} (Content: {c_score:.3f}, CF: {cf_s:.3f})"
+        )
+    return [g[0] for g in top_games]
 
 
 def recommendation_node(state: AgentState, config: RunnableConfig) -> AgentState:
     print("recommendation agent")
 
     filters = state.get("filters") or {}
-
-    # Pobranie biblioteki użytkownika
     user_id = config.get("configurable", {}).get("user_id")
-    library_ids = get_user_library(user_id) 
-
-    # Wyszukiwanie gier referencyjnych
-    references = state.get("references") or []
-
-    references_ids = []
-    for reference in references:
-        if not isinstance(reference, str) or not reference.strip():
-            continue
-
-        game = search_game_id(reference)
-        if game.get("status") == "success" and game.get("appid") is not None:
-            references_ids.append(game["appid"])
+    library_ids = get_user_library(user_id) or []
+    references_ids = resolve_reference_ids(state.get("references") or [])
+    excluded_ids = set(library_ids) | set(references_ids)
 
     db = next(get_db())
 
     try:
+        user_profile = build_user_profile(db, references_ids, library_ids)
 
-        # Pobranie embeddingów gier referencyjnych
-        ref_embeddings = []
-        if references_ids:
-            games = (
-                db.query(SteamGames.embedding)
-                .filter(SteamGames.appid.in_(references_ids))
-                .filter(SteamGames.embedding.isnot(None))
-                .all()
-            )
-            ref_embeddings = [g.embedding for g in games if g.embedding is not None]
+        # Gdy brak profilu użytkownika (brak referencji i/lub biblioteki), zwracamy najpopularniejsze gry
+        if user_profile is None:
+            return {"results": get_popular_fallback(db, filters, excluded_ids, limit=5)}
 
-        # Pobranie gier z biblioteki użytkownika
-        lib_embeddings = []
-        if library_ids:
-            games = (
-                db.query(SteamGames.embedding)
-                .filter(SteamGames.appid.in_(library_ids))
-                .filter(SteamGames.embedding.isnot(None))
-                .all()
-            )
-            lib_embeddings = [g.embedding for g in games if g.embedding is not None]
-
-        # Obliczenie profilu użytkownika (kombinacja liniowa 0.7 ref + 0.3 lib)
-        ref_profile = np.mean(ref_embeddings, axis=0) if ref_embeddings else None
-        lib_profile = np.mean(lib_embeddings, axis=0) if lib_embeddings else None
-
-        if ref_profile is not None and lib_profile is not None:
-            user_profile = 0.7 * ref_profile + 0.3 * lib_profile   # Gdy są obecne OBA źródła: wagi 0.7 i 0.3
-        elif ref_profile is not None:
-            user_profile = ref_profile  # Tylko gry referencyjne
-        elif lib_profile is not None:
-            user_profile = lib_profile  # Tylko biblioteka
-        else:
-            return {"results": []}  # Brak jakichkolwiek embeddingów do obliczeń
-
-        # Normalizacja profilu użytkownika
-        norm = np.linalg.norm(user_profile)
-        if norm > 0:
-            user_profile = user_profile / norm
-
-        # Wykluczenie gier posiadanych przez użytkownika lub referencyjnych
-        excluded_ids = set((library_ids or []) + (references_ids or []))
-        query = db.query(SteamGames.appid, SteamGames.name)
+        # Pobranie kandydatów z Content-Based Filtering
+        distance_col = SteamGames.embedding.cosine_distance(user_profile).label("distance")
+        query = db.query(SteamGames.appid, SteamGames.name, distance_col)
 
         if excluded_ids:
             query = query.filter(~SteamGames.appid.in_(excluded_ids))
 
-        # Aplikujemy dodatkowe filtry
         query = apply_filters(query, filters)
+        candidate_games = query.order_by(distance_col).limit(500).all()
 
-        # Pobieramy TOP 5 gier najbardziej podobnych do profilu użytkownika
-        matched_games = (
-            query.order_by(SteamGames.embedding.cosine_distance(user_profile))
-            .limit(5)
-            .all()
-        )
+        if not candidate_games:
+            return {"results": []}
 
-        # Formatowanie wyników
-        results = [game.appid for game in matched_games]
-        for matched_game in matched_games:
-            print(f"🎯 Znaleziono w bazie: {matched_game.name} (appid: {matched_game.appid})")
-
-        return {"results": results}
-
-        # COLLABORATIVE FILTERING
+        return {"results": rank_hybrid_candidates(candidate_games, user_id, top_n=5)}
 
     except Exception as e:
-        print(f"❌ Błąd podczas filtrowania: {e}")
+        print(f"❌ Błąd podczas rekomendacji: {e}")
         return {"results": []}
-    finally:
-        db.close()
