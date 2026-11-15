@@ -19,6 +19,7 @@ from langchain_core.messages import HumanMessage
 app = FastAPI(
     
 )
+#uzupełnić to musze
 
 app.add_middleware(
     CORSMiddleware,
@@ -31,7 +32,7 @@ app.add_middleware(
 page_size = 30
 
 # zostawiam w razie czego ale jest nie potrzebna bo każdy endpoint ma Depends(authenticate_session) ewentualnie można wrzucić przy wejściu na strone
-@app.get("/api/set_user_session")
+@app.post("/api/set_user_session")
 def set_user_session(response: Response, session: UserSession = Depends(authenticate_session), db: Session = Depends(get_db)):
     if not session:
         new_session = create_new_session(response, db, user_id = None)
@@ -325,6 +326,9 @@ def toggle_library_game(app_id: int = Body(embed=False), user_session: UserSessi
 def add_games_from_steam(user_session: UserSession = Depends(authenticate_user), db: Session = Depends(get_db)):
     user_id = user_session.user_id
     if user_id:
+        if user_session.last_steam_games_refresh_at and user_session.last_steam_games_refresh_at > datetime.now(timezone.utc).replace(tzinfo=None):
+            raise HTTPException(status_code=429, detail="Nie można odświeżyć biblioteki Steam częściej niż raz na 24 godziny.")
+
         user = db.query(Users).filter(Users.id == user_id).first()
         if not user or not user.steam_id:
             raise HTTPException(status_code=404, detail="Nie znaleziono użytkownika lub brak Steam ID.")
@@ -336,7 +340,7 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
         GamesID = [game.appid for game in query]
 
         games_already_in_library = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 1).all()
-        ganes_already_in_library_ids = [game.appid for game in games_already_in_library]
+        games_already_in_library_ids = [game.appid for game in games_already_in_library]
 
         query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).all()
 
@@ -344,7 +348,12 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
             game.FromSteam = 1
             game.playtime_forever = games_list[game.appid]
 
-        GamesID_Insert = list(set(GamesID) - {game.appid for game in query_update} - set(ganes_already_in_library_ids))
+        GamesID_Insert = list(set(GamesID) - {game.appid for game in query_update} - set(games_already_in_library_ids))
+
+        if not GamesID_Insert:
+            user_session.last_steam_games_refresh_at = datetime.now(timezone.utc)
+            db.commit()
+            return {"status": "success", "message": "odświeżono biblioteke Steam. Brak nowych gier do dodania."}
 
         objects_to_insert = [
             UserGameLibrary(
@@ -356,10 +365,9 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
             )
             for appid in GamesID_Insert
         ]
-
+        user_session.last_steam_games_refresh_at = datetime.now(timezone.utc)
         db.bulk_save_objects(objects_to_insert)
         db.commit()
-
         return {"status": "success", "message": "Gry z biblioteki Steam zostały dodane do Twojej biblioteki."}
     raise HTTPException(status_code=404, detail="Błąd przetwarzania.")
 

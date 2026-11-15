@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, column_property
 from pgvector.sqlalchemy import Vector
 from database.database import Base
 from datetime import date
-import math
 
 metacritic_default = 30
 metacritic_score_wage = 0.15
@@ -18,6 +17,7 @@ class UserSession(Base):
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("tbl_Users.id"), index=True, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=False)
     expires_at: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=False)
+    last_steam_games_refresh_at: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=True, default=None)
 
     user: Mapped["Users"] = relationship()
 
@@ -61,6 +61,7 @@ class SteamGames(Base):
     header_image_url: Mapped[str] = mapped_column(String, index=False, nullable=False)
     capsule_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
     background_image_url: Mapped[str] = mapped_column(String, index=False, nullable=True)
+    last_update: Mapped[DateTime] = mapped_column(DateTime, index=True, nullable=True, default=func.now())
     embedding: Mapped[list[float]] = mapped_column(Vector(1024), nullable=True)
 
     genres: Mapped[list["Genres"]] = relationship(

@@ -1,17 +1,17 @@
 
-from datetime import datetime, timedelta, timezone
 import uuid
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends, HTTPException, Response
 from database.models import UserSession
 from database.database import get_db
 
-def authenticate_session(request: Request, response: Response, db: Session = Depends(get_db)):
+def authenticate_session(request: Request, response: Response, db: Session = Depends(get_db)) -> UserSession:
     session_id = request.cookies.get("user_session_id")
     if not session_id:
         return create_new_session(response, db)
     db_session = db.query(UserSession).filter(UserSession.session_id == session_id).first()
-    if db_session and db_session.expires_at > datetime.now():
+    if db_session and db_session.expires_at > datetime.now(timezone.utc).replace(tzinfo=None):
         return db_session
     if db_session:
         db.delete(db_session)
@@ -26,7 +26,7 @@ def authenticate_user(request: Request, usersession: UserSession = Depends(authe
 
 def create_new_session(response: Response, db: Session, user_id: int = None):
     session_id = str(uuid.uuid4())
-    expires_at = datetime.now(timezone.utc) + timedelta(days=1)
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
     new_session = UserSession(session_id=session_id, user_id=user_id, created_at=datetime.now(timezone.utc), expires_at=expires_at)
     db.add(new_session)
     db.commit() 

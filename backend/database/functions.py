@@ -100,7 +100,7 @@ def get_steam_library_games_list(steam_id64: str, settings: Settings = get_setti
 
 def send_activation_email(email: str, token: str, settings: Settings = get_settings()):
 
-    activation_link = f"http://localhost:8000/activate?token={token}"
+    activation_link = f"http://localhost:3000/activate?token={token}"
     subject = "Aktywacja konta w Games Vault"
     body = f"Witaj,\n\nDziękujemy za rejestrację w Games Vault! Aby aktywować swoje konto, kliknij w poniższy link:\n\n{activation_link}\n\nLink jest ważny przez 24 godziny.\n\nPozdrawiamy,\nZespół Games Vault"
 
