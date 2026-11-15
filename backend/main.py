@@ -335,13 +335,16 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
         query = db.query(SteamGames).filter(SteamGames.appid.in_(games_list.keys())).all()
         GamesID = [game.appid for game in query]
 
+        games_already_in_library = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).filter(UserGameLibrary.FromSteam == 1).all()
+        ganes_already_in_library_ids = [game.appid for game in games_already_in_library]
+
         query_update = db.query(UserGameLibrary).filter(UserGameLibrary.user_id == user_id).filter(UserGameLibrary.appid.in_(GamesID)).all()
 
         for game in query_update:
             game.FromSteam = 1
             game.playtime_forever = games_list[game.appid]
 
-        GamesID_Insert = list(set(GamesID) - {game.appid for game in query_update})
+        GamesID_Insert = list(set(GamesID) - {game.appid for game in query_update} - set(ganes_already_in_library_ids))
 
         objects_to_insert = [
             UserGameLibrary(
