@@ -1,4 +1,3 @@
-import { ClientPageRoot } from "next/dist/client/components/client-page";
 import type {
   GamesResponse,
   MessageResponse,
@@ -10,26 +9,26 @@ import type {
   GetUserGames,
   StatusChangeResponse,
   NewPasswordData,
-} from "../interfaces/api";
-import { AuthUser } from "../interfaces/main";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+} from '../interfaces/api';
+import { AuthUser } from '../interfaces/main';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 async function post<T>(path: string, body: unknown): Promise<T> {
   console.log(body);
 
   const res = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    credentials: "include",
-    cache: "no-store",
+    credentials: 'include',
+    cache: 'no-store',
   });
 
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
     const message =
-      (data && typeof data === "object" && "detail" in data
+      (data && typeof data === 'object' && 'detail' in data
         ? (data as { detail?: string }).detail
         : null) ?? `Request failed with status ${res.status}`;
     throw Object.assign(new Error(message), { status: res.status });
@@ -40,16 +39,16 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
-    method: "GET",
-    cache: "no-store",
-    credentials: "include",
+    method: 'GET',
+    cache: 'no-store',
+    credentials: 'include',
   });
 
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
     const message =
-      (data && typeof data === "object" && "detail" in data
+      (data && typeof data === 'object' && 'detail' in data
         ? (data as { detail?: string }).detail
         : null) ?? `Request failed with status ${res.status}`;
     throw Object.assign(new Error(message), { status: res.status });
@@ -60,16 +59,16 @@ async function get<T>(path: string): Promise<T> {
 
 async function del<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
-    method: "DELETE",
-    credentials: "include",
-    cache: "no-store",
+    method: 'DELETE',
+    credentials: 'include',
+    cache: 'no-store',
   });
 
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
     const message =
-      (data && typeof data === "object" && "detail" in data
+      (data && typeof data === 'object' && 'detail' in data
         ? (data as { detail?: string }).detail
         : null) ?? `Request failed with status ${res.status}`;
     throw Object.assign(new Error(message), { status: res.status });
@@ -79,31 +78,34 @@ async function del<T>(path: string): Promise<T> {
 }
 
 export const getUserGames = (data: GetUserGames): Promise<GamesResponse> =>
-  post<GamesResponse>("/api/get_user_library", data);
+  post<GamesResponse>('/api/get_user_library', data);
 
 export const getGames = (data: GetGames): Promise<GamesResponse> =>
-  post<GamesResponse>("/api/get_steam_games", data);
+  post<GamesResponse>('/api/get_steam_games', data);
 
 export const sendMessage = (data: unknown): Promise<MessageResponse> =>
-  post<MessageResponse>("/api/message", data);
+  post<MessageResponse>('/api/message', data);
 
-export const createUser = (data: CreateUserData) => post<SimpleMessage>("/api/create_user", data);
+export const createUser = (data: CreateUserData) => post<SimpleMessage>('/api/create_user', data);
 
 export const updatePassword = (data: NewPasswordData) =>
-  post<SimpleMessage>("/api/change_password", data);
+  post<SimpleMessage>('/api/change_password', data);
 
 export const updateSteamId = (newSteamID: string) =>
-  post<SimpleMessage>("/api/add_steam_id", { steam_id: newSteamID });
+  post<SimpleMessage>('/api/add_steam_id', { steam_id: newSteamID });
 
 export const loadSteamLibrary = (): Promise<SimpleMessage> =>
-  post<SimpleMessage>("/api/add_games_from_steam", {});
+  post<SimpleMessage>('/api/add_games_from_steam', {});
 
-export const logoutUser = () => del<SimpleMessage>("/api/logout");
+export const logoutUser = () => del<SimpleMessage>('/api/logout');
 
 export const loginUser = async (data: LoginData): Promise<AuthUser> => {
-  await post<SimpleMessage>("/api/login", data);
-  return await get<AuthUser>("/api/get_user_info");
+  await post<SimpleMessage>('/api/login', data);
+  return await get<AuthUser>('/api/get_user_info');
 };
+
+export const activateAccount = (token: string): Promise<SimpleMessage> =>
+  post<SimpleMessage>(`/api/activate_user/${token}`, {});
 
 export const getSearchResults = (filter: string): Promise<SearchBarGameResponse[]> =>
   get<SearchBarGameResponse[]>(`/api/games_search_bar?${new URLSearchParams({ filter })}`);
@@ -126,12 +128,12 @@ export const loadAtributeListForFilter = async (
 
 export const toggleGameStatus = (
   app_id: number,
-  statusToToggle: "wishlist" | "library" | "hidden",
+  statusToToggle: 'wishlist' | 'library' | 'hidden',
 ) => {
   const apiMap = {
-    wishlist: "/api/toggle_wishlist_game",
-    hidden: "/api/toggle_hide_game",
-    library: "/api/toggle_library_game",
+    wishlist: '/api/toggle_wishlist_game',
+    hidden: '/api/toggle_hide_game',
+    library: '/api/toggle_library_game',
   };
 
   return post<StatusChangeResponse>(apiMap[statusToToggle], app_id);

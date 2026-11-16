@@ -59,6 +59,21 @@ docker compose up --watch
 
 The database is restored from `db/GamesVault_DB.backup` only on first start (empty volume). To restore a changed backup, run `docker compose down -v` first (this deletes the database data). Docker uses Python 3.12 and Node 20.
 
+4. Database backup and restore
+
+Create backup:
+
+```
+docker compose exec -t db pg_dump -U postgres -d gamesvault -F c > db/GamesVault_DB.backup
+```
+
+Restore
+
+```
+
+docker exec -i games-vault-db-1 pg_restore -U postgres -d gamesvault --clean < db/GamesVault_DB.backup
+```
+
 ## Installation (without Docker)
 
 Prerequisites:

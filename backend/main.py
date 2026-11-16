@@ -12,12 +12,12 @@ from auth.user_auth import authenticate_session, create_new_session, authenticat
 from database.functions import gen_password_hash, get_filtered_steam_games, get_searched_games, filter_user_library, GamesPagination, GET_STEAM64, get_steam_library_games_list, send_activation_email
 from database.models import UserActivationTokens, Users, UserSession, SteamGames, SteamLanguages, SteamGenres, SteamTags, SteamPlatforms, UserGameLibrary, Tags, Platforms, Genres, Languages
 from fastapi.middleware.cors import CORSMiddleware
-from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, UserPasswordChange, SteamIdUpdate 
+from schemas.schemas import GameFilter, GamesFilterRespone, UserCreate, UserLogin, GameSearchRespone, GameRespone, UserLibraryFilters, UserPasswordChange, SteamIdUpdate
 from graph import chatbot_app
 from langchain_core.messages import HumanMessage
 
 app = FastAPI(
-    
+
 )
 #uzupełnić to musze
 
@@ -72,9 +72,9 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
 
     password_hash = gen_password_hash(password)
     new_user = Users(
-        username=username, 
-        email=email, 
-        password_hash=password_hash, 
+        username=username,
+        email=email,
+        password_hash=password_hash,
         active=0
     )
     db.add(new_user)
@@ -84,7 +84,7 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
     token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
     new_activation_token = UserActivationTokens(
-        user_id=new_user.id, 
+        user_id=new_user.id,
         token=token_hash,
         created_at=datetime.now(timezone.utc),
         expires_at=datetime.now(timezone.utc) + timedelta(days=1)
@@ -95,8 +95,7 @@ async def create_user(request: Request, data: UserCreate, session: UserSession =
     status = send_activation_email(new_user.email, token)
     if status.get("status") != "200":
         raise HTTPException(status_code=500, detail=status.get("message", "Wystąpił błąd podczas wysyłania emaila aktywacyjnego."))
-    return {"message": "Użytkownik utworzony pomyślnie. Teraz możesz się zalogować.", "user_id": new_user.id}
-
+    return {"message": "Link aktywacyjny wysłany na email", "user_id": new_user.id}
 @app.post("/api/activate_user/{token}")
 async def activate_user(token: str, db: Session = Depends(get_db)):
     token_hash = hashlib.sha256(token.encode("utf-8")).hexdigest()
@@ -133,7 +132,7 @@ async def login(request: Request, response: Response, data: UserLogin, db: Sessi
         raise HTTPException(status_code=403, detail="Konto jest nieaktywne. Należy je aktywować poprzez kliknięcie w link aktywacyjny wysłany na adres e-mail.")
     elif not checkpw(password.encode('utf-8'), user.password_hash.encode('utf-8')):
         raise HTTPException(status_code=401, detail="Błędny mail lub hasło.")
-    
+
     attach_user_to_session(session.session_id, user.id, db)
     return {"message": "Zalogowano pomyślnie.", "user_id": user.id}
 
@@ -197,7 +196,7 @@ def get_steam_games(filters: GameFilter, session: UserSession = Depends(authenti
     games, total_pages = GamesPagination(query, page, page_size)
     if not games or total_pages == 0:
         raise HTTPException(status_code=404, detail="Nie znaleziono gier.")
-    
+
     if session.user_id is not None:
             games_result = [
                 GameRespone(
@@ -332,7 +331,7 @@ def add_games_from_steam(user_session: UserSession = Depends(authenticate_user),
         user = db.query(Users).filter(Users.id == user_id).first()
         if not user or not user.steam_id:
             raise HTTPException(status_code=404, detail="Nie znaleziono użytkownika lub brak Steam ID.")
-        
+
         steam_id64 = GET_STEAM64(user.steam_id)
         games_list = get_steam_library_games_list(steam_id64)
 

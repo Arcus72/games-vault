@@ -1,0 +1,190 @@
+@use "../../styles/variables" as *;
+@use "../../styles/fonts" as *;
+
+.activate {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - $header-height);
+  padding: 40px 16px;
+
+  &__card {
+    width: min(440px, 100%);
+    padding: 48px 32px;
+    background: $color-panel;
+    border: 1px solid $color-border;
+    border-radius: $radius-panel;
+    text-align: center;
+  }
+
+  /* ---------- loading state ---------- */
+
+  &__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  &__spinner {
+    width: 56px;
+    height: 56px;
+    border: 4px solid $color-border-dim;
+    border-top-color: $color-yellow;
+    border-radius: 50%;
+    animation: activate-spin 0.8s linear infinite;
+  }
+
+  &__text {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-muted;
+    letter-spacing: $tracking;
+  }
+
+  /* ---------- success state ---------- */
+
+  &__success {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: activate-fadeIn 0.5s ease;
+  }
+
+  &__check {
+    width: 64px;
+    height: 64px;
+    color: $color-yellow;
+    margin-bottom: 8px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  &__check-circle {
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: activate-circle 0.6s ease forwards;
+  }
+
+  &__check-mark {
+    stroke-dasharray: 36;
+    stroke-dashoffset: 36;
+    animation: activate-tick 0.4s ease 0.5s forwards;
+  }
+
+  /* ---------- error state ---------- */
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    animation: activate-fadeIn 0.5s ease;
+  }
+
+  &__error-icon {
+    width: 48px;
+    height: 48px;
+    color: #dc2626;
+    margin-bottom: 8px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  &__error-circle {
+    stroke-dasharray: 151;
+    stroke-dashoffset: 151;
+    animation: activate-circle 0.6s ease forwards;
+  }
+
+  &__error-x {
+    stroke-dasharray: 46;
+    stroke-dashoffset: 46;
+    animation: activate-tick 0.4s ease 0.5s forwards;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: 800;
+    letter-spacing: $tracking;
+    color: $color-text-soft;
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $color-text-muted;
+    line-height: 1.5;
+    max-width: 320px;
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    height: 46px;
+    padding: 0 32px;
+    border-radius: $radius-btn;
+    background: $grad-brand;
+    font-size: $font-size-xl;
+    font-weight: 500;
+    color: $color-text;
+    text-shadow: 0 4px 5px rgba(0, 0, 0, 0.42);
+    transition: filter 0.2s ease, background 0.2s ease;
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+
+    &--gray {
+      background: rgba(92, 92, 92, 0.32);
+      border: 1px solid $color-border-gray;
+      text-shadow: none;
+
+      &:hover {
+        background: rgba(92, 92, 92, 0.45);
+        filter: none;
+      }
+    }
+  }
+}
+
+/* ---------- keyframes ---------- */
+
+@keyframes activate-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes activate-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes activate-circle {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes activate-tick {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import "./library.scss";
-import FilterAside from "../../components/FilterAside/FilterAside";
-import GameCard from "../../components/GameCard/GameCard";
-import Pagination from "../../components/Pagination/Pagination";
-import Fab from "../../components/Fab/Fab";
-import { getUserGames } from "../../lib/api";
-import type { Game } from "../../interfaces/main";
-import { FilterValues } from "../../interfaces/main";
-import { showMessage } from "@/components/Message/Message";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from 'react';
+import './library.scss';
+import FilterAside from '../../components/FilterAside/FilterAside';
+import GameCard from '../../components/GameCard/GameCard';
+import Pagination from '../../components/Pagination/Pagination';
+import Fab from '../../components/Fab/Fab';
+import { getUserGames } from '../../lib/api';
+import type { Game } from '../../interfaces/main';
+import { FilterValues } from '../../interfaces/main';
+import { showMessage } from '@/components/Message/Message';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 const views = [
-  { id: 2, label: "Moje gry" },
+  { id: 2, label: 'Moje gry' },
   {
     id: 1,
-    label: "Lista życzeń",
-    icon: "/assets/toggle-wishlist.svg",
+    label: 'Lista życzeń',
+    icon: '/assets/toggle-wishlist.svg',
   },
-  { id: 3, label: "Ukryte", icon: "/assets/toggle-hidden.svg" },
+  { id: 3, label: 'Ukryte', icon: '/assets/toggle-hidden.svg' },
 ] as const;
 
 export default function LibraryPage() {
@@ -34,7 +34,7 @@ export default function LibraryPage() {
 
   useEffect(() => {
     if (!isLogged()) {
-      router.push("/");
+      router.push('/');
     }
   }, []);
 
@@ -49,8 +49,8 @@ export default function LibraryPage() {
         setPage(res?.page ?? 1);
         setTotalPages(res?.pages ?? 1);
       })
-      .catch((error) => {
-        showMessage(error.message, "error");
+      .catch(() => {
+        // showMessage(error.message, "error");
         setGames([]);
         setPage(1);
         setTotalPages(1);
@@ -58,19 +58,19 @@ export default function LibraryPage() {
   }, [page, gameStatus, filters]);
 
   return (
-    <main className="page">
-      <div className="layout layout--library">
-        <div className="layout__sidebar">
-          <section className="Library">
-            <h2 className="Library__title">Widok</h2>
-            <div className="Library__group">
+    <main className='page'>
+      <div className='layout layout--library'>
+        <div className='layout__sidebar'>
+          <section className='Library'>
+            <h2 className='Library__title'>Widok</h2>
+            <div className='Library__group'>
               {views.map((v) => (
                 <button
                   key={v.id}
-                  className={`Library__btn${gameStatus === v.id ? " Library__btn--active" : ""}`}
+                  className={`Library__btn${gameStatus === v.id ? ' Library__btn--active' : ''}`}
                   onClick={() => setGameStatus(v.id)}
                 >
-                  {"icon" in v && <img className="Library__icon" src={v.icon} alt="" />}
+                  {'icon' in v && <img className='Library__icon' src={v.icon} alt='' />}
                   {v.label}
                 </button>
               ))}
@@ -78,11 +78,11 @@ export default function LibraryPage() {
           </section>
           <FilterAside onSave={setFilters} />
         </div>
-        <section className="layout__content">
+        <section className='layout__content'>
           {games.length == 0 ? (
-            <div className="Library__noGameFound">Żadna gra nie została jeszcze dodana</div>
+            <div className='Library__noGameFound'>Żadna gra nie została jeszcze dodana</div>
           ) : (
-            <div className="grid">
+            <div className='grid'>
               {games.map((g) => (
                 <GameCard
                   key={g.appid}
@@ -93,7 +93,9 @@ export default function LibraryPage() {
               ))}
             </div>
           )}
-          <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
+          {games.length != 0 && (
+            <Pagination currentPage={page} setPage={setPage} totalPages={totalPages} />
+          )}
         </section>
       </div>
       <Fab />

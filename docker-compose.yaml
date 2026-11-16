@@ -1,73 +1,81 @@
 services:
-  web:
-    depends_on:
-      api:
-        condition: service_healthy
-    build: ./frontend
-    ports:
-      - "3000:3000"
-    environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
-    develop:
-      watch:
-        - path: ./frontend/package.json
-          action: rebuild
-        - path: ./frontend/package-lock.json
-          action: rebuild
-        - path: ./frontend
-          target: /app
-          action: sync
-          ignore:
-            - node_modules/
-            - .next/
+   web:
+      depends_on:
+         api:
+            condition: service_healthy
+      build: ./frontend
+      ports:
+         - '3000:3000'
+      environment:
+         NEXT_PUBLIC_API_URL: http://localhost:8000
+      develop:
+         watch:
+            - path: ./frontend/package.json
+              action: rebuild
+            - path: ./frontend/package-lock.json
+              action: rebuild
+            - path: ./frontend
+              target: /app
+              action: sync
+              ignore:
+                 - node_modules/
+                 - .next/
 
-  api:
-    depends_on:
-      db:
-        condition: service_healthy
-    build: ./backend
-    ports:
-      - "8000:8000"
-    environment:
-      DB_LINK: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
-      GEMINI_API: ${GEMINI_API}
-      STEAM_API_KEY: ${STEAM_API_KEY}
-      MODEL_NAME: ${MODEL_NAME:-BAAI/bge-m3}
-      HF_TOKEN: ${HF_TOKEN:-}
-      HF_HOME: /home/app/.cache/huggingface
-    volumes:
-      - hf_cache:/home/app/.cache/huggingface
-    healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)" ]
-      interval: 10s
-      retries: 3
-      start_period: 15m
-    develop:
-      watch:
-        - path: ./backend/requirements.txt
-          action: rebuild
-        - path: ./backend
-          target: /app
-          action: sync
-          ignore:
-            - .venv/
-            - __pycache__/
+   api:
+      depends_on:
+         db:
+            condition: service_healthy
+      build: ./backend
+      ports:
+         - '8000:8000'
+      environment:
+         DB_LINK: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/gamesvault
+         GEMINI_API: ${GEMINI_API}
+         STEAM_API_KEY: ${STEAM_API_KEY}
+         MODEL_NAME: ${MODEL_NAME:-BAAI/bge-m3}
+         HF_TOKEN: ${HF_TOKEN:-}
+         SMTP_USER: ${SMTP_USER}
+         SMTP_PASSWORD: ${SMTP_PASSWORD}
+         HF_HOME: /home/app/.cache/huggingface
+      volumes:
+         - hf_cache:/home/app/.cache/huggingface
+      healthcheck:
+         test:
+            [
+               'CMD',
+               'python',
+               '-c',
+               "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs', timeout=5)",
+            ]
+         interval: 10s
+         retries: 3
+         start_period: 15m
+      develop:
+         watch:
+            - path: ./backend/requirements.txt
+              action: rebuild
+            - path: ./backend
+              target: /app
+              action: sync
+              ignore:
+                 - .venv/
+                 - __pycache__/
 
-  db:
-    build: ./db
-    ports:
-      - "5433:5432"
-    environment:
-      POSTGRES_DB: gamesvault
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d gamesvault" ]
-      interval: 10s
-      retries: 10
+   db:
+      build: ./db
+      ports:
+         - '5433:5432'
+      environment:
+         POSTGRES_DB: gamesvault
+         POSTGRES_USER: postgres
+         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      volumes:
+         - postgres_data:/var/lib/postgresql
+      healthcheck:
+         test: ['CMD-SHELL', 'pg_isready -U postgres -d gamesvault']
+         interval: 10s
+         retries: 10
 
 volumes:
-  postgres_data:
-  hf_cache:
+   postgres_data:
+   hf_cache:
