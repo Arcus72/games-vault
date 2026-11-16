@@ -1,7 +1,14 @@
 FROM python:3.12-slim
 
-RUN useradd -m app
-RUN mkdir -p /home/app/.cache/huggingface && chown -R app:app /home/app/.cache
+# Install g++ and build tools required to compile hnswlib
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m app && \
+    mkdir -p /home/app/.cache/huggingface && \
+    chown -R app:app /home/app/.cache
+
 WORKDIR /app
 
 COPY requirements.txt .
