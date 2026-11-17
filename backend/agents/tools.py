@@ -125,6 +125,87 @@ def search_game_id(game_name: str) -> dict[str, Any]:
         db.close()
 
 
+from typing import Any
+from model_loader import get_embedding_model
+
+VECTOR_SIMILARITY_THRESHOLD = 0.70
+
+def search_game_id_by_vector(game_name: str) -> dict[str, Any]:
+    """Wyszukuje ID (appid) oraz dokładną nazwę gry w bazie danych przy użyciu embeddingów (pgvector)."""
+    clean_name = (game_name or "").strip()
+    if not clean_name:
+        return {"status": "error", "message": "Pusta nazwa gry", "appid": None}
+
+    db = next(get_db())
+    embedding_model = get_embedding_model()
+
+    try:
+        # 1. Zamiana zapytania użytkownika na wektor
+        query_vector = embedding_model.encode(
+            clean_name, normalize_embeddings=True
+        ).tolist()
+
+        # 2. Zapytanie do PostgreSQL (pgvector) – pobiera 1 najbliższy rekord
+        # cosine_distance zwraca wartość z przedziału [0, 2], gdzie 0 oznacza identyczne wektory
+        result = (
+            db.query(
+                SteamGames.appid,
+                SteamGames.name,
+                SteamGames.embedding_name.cosine_distance(query_vector).label(
+                    "distance"
+                ),
+            )
+            .filter(
+                SteamGames.name.isnot(None),
+                SteamGames.embedding_name.isnot(None),
+            )
+            .order_by("distance")
+            .first()
+        )
+
+        if not result:
+            return {
+                "status": "not_found",
+                "message": "Baza gier jest pusta lub brak wygenerowanych embeddingów",
+                "appid": None,
+                "searched_query": clean_name,
+            }
+
+        appid, best_title, distance = result
+
+        # Przeliczenie dystansu cosinusowego na podobieństwo (similarity: 0.0 - 1.0)
+        similarity = max(0.0, 1.0 - float(distance))
+
+        if similarity >= VECTOR_SIMILARITY_THRESHOLD:
+            print(
+                f"🎯 Vector Match: '{clean_name}' -> '{best_title}' "
+                f"(appid: {appid}, similarity: {similarity * 100:.1f}%)"
+            )
+            return {
+                "status": "success",
+                "appid": appid,
+                "matched_name": best_title,
+                "searched_query": clean_name,
+            }
+
+        print(
+            f"⚠️ Zbyt słabe dopasowanie dla '{clean_name}' "
+            f"(najbliżej: '{best_title}', similarity: {similarity * 100:.1f}%)"
+        )
+        return {
+            "status": "not_found",
+            "message": f"Nie znaleziono gry: {clean_name}",
+            "appid": None,
+            "searched_query": clean_name,
+        }
+
+    except Exception as e:
+        print(f"❌ Błąd w search_game_id_by_vector: {e}")
+        return {"status": "error", "message": str(e), "appid": None}
+    finally:
+        db.close()
+
+
 def get_user_library(user_id: int):
     if user_id is None:
         return []

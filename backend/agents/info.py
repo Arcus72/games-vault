@@ -4,7 +4,7 @@ from database.database import get_db
 from database.models import SteamGames
 from schemas.agent_schemas import AgentState
 
-from agents.tools import search_game_id
+from agents.tools import search_game_id, search_game_id_by_vector
 
 
 def info_node(state: AgentState) -> dict[str, Any]:
@@ -22,7 +22,8 @@ def info_node(state: AgentState) -> dict[str, Any]:
         if not isinstance(reference, str) or not reference.strip():
             continue
 
-        game = search_game_id(reference)
+        # game = search_game_id(reference)
+        game = search_game_id_by_vector(reference)
         if game.get("status") == "success" and game.get("appid") is not None:
             matched_ids.append(game["appid"])
 

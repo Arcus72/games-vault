@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from database.database import get_db
 from database.models import SteamGames
 from schemas.agent_schemas import AgentState
-from agents.tools import apply_filters, search_game_id, get_user_library
+from agents.tools import apply_filters, search_game_id, search_game_id_by_vector, get_user_library
 from model_loader import get_als_recommendations
 
 
@@ -15,7 +15,8 @@ def resolve_reference_ids(references: list) -> list[int]:
 
     for ref in references or []:
         if isinstance(ref, str) and ref.strip():
-            game = search_game_id(ref)
+            # game = search_game_id(ref)
+            game = search_game_id_by_vector(ref)
             if game.get("status") == "success" and game.get("appid") is not None:
                 ref_ids.append(int(game["appid"]))
     return list(dict.fromkeys(ref_ids))

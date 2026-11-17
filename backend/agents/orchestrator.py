@@ -86,7 +86,7 @@ Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
 - Dla intencji "semantic_search": Wyodrębnij wszelkie kryteria wyszukiwania i zapisz je w polu `filters`.
 
 - Dla intencji "follow_up_question"
-W polu `references` umieść DOKŁADNE NAZWY gier z historii, o które pyta użytkownik.
+W polu `references` umieść DOKŁADNE NAZWY gier JAK NA STEAM z historii, o które pyta użytkownik.
 Jeśli użytkownik pyta ogólnie (np. "Opisz mi te gry"), umieść w `references` wszystkie nazwy zarekomendowanych gier.
 Jeśli pyta o wybrane pozycje (np. "Porównaj trzecią grę i Cyberpunka", "Opisz bardziej drugą grę"), umieść w `references` TYLKO te konkretne tytuły.
 
