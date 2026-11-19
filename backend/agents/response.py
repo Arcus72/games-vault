@@ -80,6 +80,31 @@ def response_node(state: AgentState) -> dict:
                 "Opisuj tylko te gry, o których posiadasz pełne dane, ignorując poboczne wzmianki o innych tytułach:"
             )
 
+        elif intent == "releases":
+            context_str = "\n".join(
+                [
+                    f"--- SZCZEGÓŁY GRA: {g.name} ---\n"
+                    f"Tytuł: {g.name or 'Brak'}\n"
+                    f"Krótki opis: {g.short_description or 'Brak'}\n"
+                    f"O grze: {g.about_the_game or 'Brak'}\n"
+                    f"Wydawca: {g.publisher or 'Brak'}\n"
+                    f"Deweloper: {g.developer or 'Brak'}\n"
+                    f"Data premiery: {g.release_date or 'Brak'}\n"
+                    f"Wymagania PC: {g.pc_requirements or 'Brak'}\n"
+                    f"Cena: {g.price or 'Brak'}\n"
+                    f"Gatunki: {', '.join([x.genre for x in g.genres]) if g.genres else 'Brak'}\n"
+                    f"Platformy: {', '.join([x.platform for x in g.platforms]) if g.platforms else 'Brak'}\n"
+                    f"Języki: {', '.join([x.language for x in g.languages]) if g.languages else 'Brak'}\n"
+                    f"Tagi: {', '.join([x.tag for x in g.tags]) if g.tags else 'Brak'}"
+                    for g in matched_games
+                ]
+            )
+            instructions = (
+                "Prezentujesz zestawienie najpopularniejszych premier gier. Odpowiadaj WYŁĄCZNIE "
+                "na podstawie poniższych danych i opisuj tylko tytuły z własną sekcją szczegółów, "
+                "pomijając inne wzmianki:"
+            )
+
         elif intent == "semantic_search":
             context_str = "\n".join(
                 [
@@ -147,7 +172,7 @@ def response_node(state: AgentState) -> dict:
             "messages": [AIMessage(content=response.content)],
             "games": [
                 {
-                    "id": g.appid,
+                    "appid": g.appid,
                     "title": g.name,
                     "price": g.price,
                     "currency": "PLN",

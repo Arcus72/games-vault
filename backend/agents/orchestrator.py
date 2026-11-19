@@ -33,11 +33,14 @@ def orchestrator_node(state: AgentState, config: RunnableConfig):
         print(f"🔍 Filtry: {filters}")
     if result.references:
         print(f"🔍 Referencyjne gry: {result.references}")
+    if result.number_of_results:
+        print(f"📊 Liczba wyników: {result.number_of_results}")
 
     return {
         "message_intent": result.message_intent,
         "filters": filters,
-        "references": result.references
+        "references": result.references,
+        "number_of_results": min(result.number_of_results, 15) if result.number_of_results else 5,
     }
 
 
@@ -73,10 +76,13 @@ Sklasyfikuj intencję użytkownika do DOKŁADNIE JEDNEJ z poniższych kategorii:
 3. "game_info" – Użytkownik pyta o szczegółowe informacje, opisy lub dane dotyczące jednej konkretnej gry.
    Przykłady: "Powiedz mi wszystko o Cyberpunk 2077", "Jaka jest cena Witcher 3?", "Opowiedz mi o grze GTA V", "Porównaj mi grę Cyberpunk 2077 z GTA V"
 
-4. "follow_up_question" – Użytkownik dopytuje o gry, które zostały mu przed chwilą zwrócone przez system w poprzedniej odpowiedzi.
+4. "releases" – Użytkownik pyta o najnowsze, najpopularniejsze lub nadchodzące premiery gier na Steam.
+   Przykłady: "Jakie są teraz najpopularniejsze premiery?", "Jakie gry niedługo mają premierę?", "Pokaż nadchodzące hity"
+
+5. "follow_up_question" – Użytkownik dopytuje o gry, które zostały mu przed chwilą zwrócone przez system w poprzedniej odpowiedzi.
    Przykłady: "Opisz mi bardziej tą grę", "Opowiedz coś więcej o 2 ostatnich grach z tej listy", "Porównaj mi te gry z grą GTA V"
 
-5. "out_of_scope": Pytanie NIE dotyczy gier wideo lub jest bezsensowym ciągiem znaków.
+6. "out_of_scope": Pytanie NIE dotyczy gier wideo lub jest bezsensowym ciągiem znaków.
 
 # ZASADY EKSTRAKCJI DANYCH (EXTRACTION RULES)
 - Dla intencji "game_info": Wyodrębnij nazwę docelowej gry/gier do pola `references`.

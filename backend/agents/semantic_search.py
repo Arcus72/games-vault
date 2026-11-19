@@ -3,22 +3,28 @@ from schemas.agent_schemas import AgentState
 from database.database import get_db
 from model_loader import get_embedding_model
 from database.models import SteamGames
+from agents.tools import apply_filters
+
 
 def semantic_search_node(state: AgentState) -> AgentState:
     print("semantic search agent")
 
     db = next(get_db())
     embedding_model = get_embedding_model()
+    filters = state.get("filters") or {}
+    num_of_results = state.get("number_of_results")
 
     try:
         query_vector = embedding_model.encode(
             state["messages"][-1].content, normalize_embeddings=True
         ).tolist()
 
+        query = db.query(SteamGames.appid, SteamGames.name)
+        query = apply_filters(query, filters)
+
         matched_games = (
-            db.query(SteamGames.appid, SteamGames.name)
-            .order_by(SteamGames.embedding.cosine_distance(query_vector))
-            .limit(3)
+            query.order_by(SteamGames.embedding.cosine_distance(query_vector))
+            .limit(num_of_results)
             .all()
         )
 

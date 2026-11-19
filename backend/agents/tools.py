@@ -215,6 +215,7 @@ def get_user_library(user_id: int):
     library_games = (
         db.query(UserGameLibrary.appid)
         .filter(UserGameLibrary.user_id == user_id)
+        .filter(UserGameLibrary.status == 2)  # status 2 oznacza "posiadane"
         .all()
     )
 

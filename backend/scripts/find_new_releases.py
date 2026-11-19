@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_top_upcoming_steam_ids(limit: int = 20) -> list[str]:
+def get_top_upcoming_steam_ids(limit: int = 20) -> list[int]:
     """Zwraca listę ID (AppID) dla najpopularniejszych nadchodzących gier ze Steam."""
     url = (
         "https://store.steampowered.com/search/results/"
@@ -25,7 +25,7 @@ def get_top_upcoming_steam_ids(limit: int = 20) -> list[str]:
             continue
 
         # W przypadku zestawów/DLC wybieramy główny AppID
-        app_id = raw_appid.split(",")[0]
+        app_id = int(raw_appid.split(",")[0])
 
         if app_id not in app_ids:
             app_ids.append(app_id)

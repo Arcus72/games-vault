@@ -62,7 +62,7 @@ def build_user_profile(
     return (profile / norm) if norm > 0 else None
 
 
-def get_popular_fallback(db: Session, filters: dict, excluded_ids: set[int], limit: int = 5) -> list[int]:
+def get_popular_fallback(db: Session, filters: dict, excluded_ids: set[int], limit: int = 15) -> list[int]:
     """Zwraca najpopularniejsze gry, respektując filtry i wykluczenia."""
     print("ℹBrak biblioteki i referencji — zwracam najpopularniejsze gry.")
     query = db.query(SteamGames.appid, SteamGames.name, SteamGames.popularity)
@@ -83,7 +83,7 @@ def get_popular_fallback(db: Session, filters: dict, excluded_ids: set[int], lim
     return [g.appid for g in games]
 
 
-def rank_hybrid_candidates(candidate_games: list, user_id: int | None, top_n: int = 5) -> list[int]:
+def rank_hybrid_candidates(candidate_games: list, user_id: int | None, top_n: int = 15) -> list[int]:
     """Łączy wynik Content-Based (distance) z Collaborative Filtering (ALS) i zwraca TOP N."""
     cf_scores_map = get_als_recommendations(user_id, N=1000) if user_id is not None else {}
     alpha = 0.6 if cf_scores_map else 1.0
@@ -114,6 +114,7 @@ def recommendation_node(state: AgentState, config: RunnableConfig) -> AgentState
     library_ids = get_user_library(user_id) or []
     references_ids = resolve_reference_ids(state.get("references") or [])
     excluded_ids = set(library_ids) | set(references_ids)
+    num_of_results = state.get("number_of_results")
 
     db = next(get_db())
 
@@ -122,7 +123,7 @@ def recommendation_node(state: AgentState, config: RunnableConfig) -> AgentState
 
         # Gdy brak profilu użytkownika (brak referencji i/lub biblioteki), zwracamy najpopularniejsze gry
         if user_profile is None:
-            return {"results": get_popular_fallback(db, filters, excluded_ids, limit=5)}
+            return {"results": get_popular_fallback(db, filters, excluded_ids, limit=num_of_results)}
 
         # Pobranie kandydatów z Content-Based Filtering
         distance_col = SteamGames.embedding.cosine_distance(user_profile).label("distance")
@@ -137,8 +138,10 @@ def recommendation_node(state: AgentState, config: RunnableConfig) -> AgentState
         if not candidate_games:
             return {"results": []}
 
-        return {"results": rank_hybrid_candidates(candidate_games, user_id, top_n=5)}
+        return {"results": rank_hybrid_candidates(candidate_games, user_id, top_n=num_of_results)}
 
     except Exception as e:
         print(f"❌ Błąd podczas rekomendacji: {e}")
         return {"results": []}
+    finally:
+        db.close()

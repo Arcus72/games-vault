@@ -11,15 +11,17 @@ class AgentState(TypedDict):
 
     filters: GameFilter | None
     references: list[str] | None
+    number_of_results:int | None
 
     results: list[dict[str, Any]]
     games: list[dict[str, Any]]
 
 
 class IntentClassifier(BaseModel):
-    message_intent: Literal["recommendation", "semantic_search", "game_info", "follow_up_question", "out_of_scope"] = Field(
+    message_intent: Literal["recommendation", "semantic_search", "game_info", "follow_up_question", "releases", "out_of_scope"] = Field(
         ...,
-        description="Classify whether the user wants recommendation, semantic_search, game_info, follow_up_question or out_of_scope",
+        description="Classify whether the user wants recommendation, semantic_search, game_info, follow_up_question, releases or out_of_scope",
     )
     references: list[str] | None
+    number_of_results: int | None
     filters: GameFilter = Field(default_factory=GameFilter)

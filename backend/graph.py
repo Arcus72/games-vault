@@ -4,6 +4,7 @@ from agents.orchestrator import orchestrator_node
 from agents.recommendation import recommendation_node
 from agents.semantic_search import semantic_search_node
 from agents.info import info_node
+from agents.releases import releases_node
 from agents.response import response_node
 from schemas.agent_schemas import AgentState
 
@@ -16,6 +17,7 @@ def build_app():
     graph.add_node("recommendation_agent", recommendation_node)
     graph.add_node("semantic_search_agent", semantic_search_node)
     graph.add_node("info_agent", info_node)
+    graph.add_node("releases_agent", releases_node)
     graph.add_node("response_agent", response_node)
 
     # Start grafu
@@ -29,6 +31,7 @@ def build_app():
             'recommendation': 'recommendation_agent',
             'semantic_search': 'semantic_search_agent',
             'game_info': 'info_agent',
+            'releases': 'releases_agent',
             'follow_up_question': 'info_agent',
             'out_of_scope': 'response_agent'
         }
@@ -38,6 +41,7 @@ def build_app():
     graph.add_edge('recommendation_agent', 'response_agent')
     graph.add_edge('semantic_search_agent', 'response_agent')
     graph.add_edge('info_agent', 'response_agent')
+    graph.add_edge('releases_agent', 'response_agent')
     graph.add_edge('response_agent', END)
 
     checkpointer = InMemorySaver()
