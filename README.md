@@ -61,17 +61,42 @@ The database is restored from `db/GamesVault_DB.backup` only on first start (emp
 
 4. Database backup and restore
 
+Run all commands from the project root directory.
+
+Download backup:
+
+```bash
+./db_backup/download_backup.sh
+```
+
+_Windows:_
+
+```cmd
+.\db_backup\download_backup.bat
+```
+
+Restore:
+
+```bash
+./db_backup/restore_backup.sh
+```
+
+_Windows:_
+
+```cmd
+.\db_backup\restore_backup.bat
+```
+
 Create backup:
 
-```
-docker compose exec -t db pg_dump -U postgres -d gamesvault -F c > db/GamesVault_DB.backup
-```
-
-Restore
-
+```bash
+./db_backup/create_backup.sh
 ```
 
-docker exec -i games-vault-db-1 pg_restore -U postgres -d gamesvault --clean < db/GamesVault_DB.backup
+_Windows:_
+
+```cmd
+.\db_backup\create_backup.bat
 ```
 
 ## Installation (without Docker)

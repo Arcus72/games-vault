@@ -1,5 +1,5 @@
-@use "../../styles/variables" as *;
-@use "../../styles/fonts" as *;
+@use '../../styles/variables' as *;
+@use '../../styles/fonts' as *;
 
 .GameCard {
   position: relative;
@@ -20,10 +20,11 @@
     left: 0;
     bottom: 12px;
     height: 35px;
-    width: 165px;
+    width: min-content;
+    padding-right: 10px;
     display: flex;
     align-items: center;
-    background: linear-gradient(90deg, $color-black 37.5%, rgba(0, 0, 0, 0) 100%);
+    background: rgba($color-black, 0.7);
   }
 
   &__nameBar {
@@ -89,7 +90,7 @@
     width: 30px;
     height: 30px;
     border: 1px solid $color-border-gray;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.493);
     border-radius: 50%;
     cursor: pointer;
 

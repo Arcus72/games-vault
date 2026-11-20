@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 import './FilterAside.scss';
 import { FilterSection, FilterValues } from '../../interfaces/main';
-import Section from './Section';
+import Checkbox from './Checkbox';
+import Search from './Search';
+import Select from './Select';
+import Slider from './Slider';
+import Year from './Year';
+import BoolCheck from './BoolCheck';
 import { loadAtributeListForFilter } from '@/lib/api';
 import Button from '../Button/Button';
 
@@ -39,12 +44,12 @@ async function getConfig(skipNames: string[] = []): Promise<FilterSection[]> {
         { label: 'Najwyższa cena', value: { sort_by: 'price', ascending: 0 } },
       ],
       open: true,
+      value: { sort_by: 'popularity', ascending: 0 },
     },
     {
       type: 'slider',
       label: 'zakres cen',
       name: 'price_max',
-      value: null,
       steps: [
         { label: 'Za darmo', value: 0 },
         { label: 'poniżej 20zł', value: 20 },
@@ -61,6 +66,14 @@ async function getConfig(skipNames: string[] = []): Promise<FilterSection[]> {
       name: 'yearSpan',
       startName: 'release_date_min_year',
       endName: 'release_date_max_year',
+      open: true,
+    },
+    {
+      type: 'boolCheck',
+      label: 'Premiery',
+      name: 'IsReleased',
+      option: 'Tylko wydane',
+      checked: true,
       open: true,
     },
     {
@@ -96,11 +109,17 @@ async function getConfig(skipNames: string[] = []): Promise<FilterSection[]> {
 function initialValues(filterConfig: FilterSection[]): FilterValues {
   const values: FilterValues = {};
   filterConfig.forEach((s) => {
-    if (s.type === 'search' || s.type === 'select') values[s.name] = null;
-    else if (s.type === 'slider') values[s.name] = s.value;
-    else if (s.type === 'range') {
-      values[s.startName] = null;
-      values[s.endName] = null;
+    if (s.type === 'search') {
+      values[s.name] = s.value ?? null;
+    } else if (s.type === 'select') {
+      values[s.name] = s.value ?? null;
+    } else if (s.type === 'slider') {
+      values[s.name] = s.value ?? null;
+    } else if (s.type === 'range') {
+      values[s.startName] = s.startValue ?? null;
+      values[s.endName] = s.endValue ?? null;
+    } else if (s.type === 'boolCheck') {
+      values[s.name] = s.checked ?? null;
     } else {
       values[s.name] = s.checked?.length ? s.checked : null;
     }
@@ -190,9 +209,24 @@ export default function FilterAside({
       </div>
 
       <div id='filter-aside-content' className='FilterAside__content'>
-        {config.map((s) => (
-          <Section key={s.name} section={s} values={values} set={set} />
-        ))}
+        {config.map((s) => {
+          switch (s.type) {
+            case 'search':
+              return <Search key={s.name} section={s} values={values} set={set} />;
+            case 'slider':
+              return <Slider key={s.name} section={s} values={values} set={set} />;
+            case 'select':
+              return <Select key={s.name} section={s} values={values} set={set} />;
+            case 'range':
+              return <Year key={s.name} section={s} values={values} set={set} />;
+            case 'checkboxes':
+              return <Checkbox key={s.name} section={s} values={values} set={set} />;
+            case 'boolCheck':
+              return <BoolCheck key={s.name} section={s} values={values} set={set} />;
+            default:
+              return null;
+          }
+        })}
         <div className='FilterAside__buttons'>
           <Button text='Zapisz' onClick={handleSave} className='FilterAside__btn' />
           <Button

@@ -14,3 +14,5 @@ node_modules
 TODO.txt
 todo.txt
 alembic.ini
+db_backup.backup
+frontend/tsconfig.tsbuildinfo

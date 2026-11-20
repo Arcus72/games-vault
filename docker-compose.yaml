@@ -62,7 +62,7 @@ services:
                  - __pycache__/
 
    db:
-      build: ./db
+      image: pgvector/pgvector:pg18
       ports:
          - '5433:5432'
       environment:

@@ -1,5 +1,5 @@
-@use "../../styles/variables" as *;
-@use "../../styles/fonts" as *;
+@use '../../styles/variables' as *;
+@use '../../styles/fonts' as *;
 
 .Header {
   position: sticky;
@@ -71,13 +71,58 @@
     width: 32px;
     height: 32px;
   }
-
   &__userButton {
-    margin: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 5px;
+    padding: 6px 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-decoration: none;
+    white-space: nowrap;
+    color: $color-black;
+    background-color: $color-yellow;
+    border: none;
+    border-radius: 7px;
+    box-shadow: 0 3px 0 #b87304;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease,
+      filter 0.15s ease;
+
+    &:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 0 #b87304;
+    }
+
+    &:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #b87304;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $color-text;
+      outline-offset: 2px;
+    }
 
     &--logout {
-      font-size: $font-size-base;
-      color: red;
+      background-color: #e74c3c;
+      color: #ffffff;
+      box-shadow: 0 3px 0 #96281b;
+
+      &:hover {
+        box-shadow: 0 4px 0 #96281b;
+      }
+
+      &:active {
+        box-shadow: 0 1px 0 #96281b;
+      }
     }
   }
 

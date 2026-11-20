@@ -168,7 +168,6 @@ export default function ChatView() {
               aria-label='Przełącz filtry'
             >
               <img className='Chat__inputCategoryImg' src='/assets/category.svg' alt='' />
-              {filtersOpen && <span className='Chat__inputCount'>4</span>}
             </button>
             <input
               className='Chat__inputField'

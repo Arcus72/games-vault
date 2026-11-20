@@ -28,7 +28,9 @@ export default function LibraryPage() {
   const [gameStatus, setGameStatus] = useState<1 | 2 | 3>(2);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(10);
-  const [filters, setFilters] = useState<FilterValues | null>(null);
+  const [filters, setFilters] = useState<FilterValues | null>({
+    sorting: { sort_by: 'recommendations', ascending: 0 },
+  });
   const { isLogged } = useAuth();
   const router = useRouter();
 
